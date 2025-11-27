@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .api.rest import router as rest_router
-from .api.websocket.routers import router as ws_v1_router
+from .api.websocket.routers import router as ws_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AI Proctoring Engine")
@@ -19,7 +19,7 @@ app.add_middleware(
 # rest_router likely contains HTTP REST endpoints
 app.include_router(rest_router)
 # ws_router likely contains WebSocket endpoints for real-time communication (like proctoring video/audio streams or notifications).
-app.include_router(ws_v1_router)
+app.include_router(ws_router)
 
 @app.get("/health")
 async def health():

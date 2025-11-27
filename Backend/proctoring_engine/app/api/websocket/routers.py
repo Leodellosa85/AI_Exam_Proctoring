@@ -1,9 +1,11 @@
-# app/api/websocket/v1/routers.py
 from fastapi import APIRouter, WebSocket
-from .websocket import DirectionWebSocketV1
+from .websocket import DirectionWebSocket
+from ...detection.hf_mediapipe_detector import HF_MediaPipe_Detector
 
 router = APIRouter()
-ws_handler = DirectionWebSocketV1()
+
+detector_model = HF_MediaPipe_Detector()
+ws_handler = DirectionWebSocket(detector=detector_model)
 
 @router.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
