@@ -1,0 +1,194 @@
+{
+  "created_at": "2025-11-27T05:59:04.485838Z",
+  "events": [
+    {
+      "ts": "2025-11-27T05:59:04.485838Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T05:59:04.487841Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T05:59:06.729238Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": -0.3625235723201921,
+        "pitch": 25.84070684939128
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:07.186459Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": -1.2727939357359406,
+        "pitch": 25.778834300657707
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:07.727721Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": -0.22205223252729023,
+        "pitch": 26.4269210029334
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:08.317400Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": 0.6683604683250248,
+        "pitch": 25.8758864363707
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:08.317400Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:09.282993Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 5,
+        "yaw": -4.152876077743903,
+        "pitch": 26.425803343690713
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:10.273205Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 6,
+        "yaw": 1.2411952324121627,
+        "pitch": 26.35702458846409
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:11.267483Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 7,
+        "yaw": 2.339859661268388,
+        "pitch": 26.908384339768148
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:12.245283Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 8,
+        "yaw": 2.2847828515151,
+        "pitch": 26.740346158715965
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:13.166324Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 9,
+        "yaw": 1.9054165348541363,
+        "pitch": 27.234551657731622
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:14.170910Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 10,
+        "yaw": 1.3252927487544506,
+        "pitch": 28.06662580843449
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:15.195066Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 11,
+        "yaw": 1.137336965301727,
+        "pitch": 28.1835207456961
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:16.189678Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 12,
+        "yaw": 1.5191695251562083,
+        "pitch": 28.595717928716574
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:17.162783Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 13,
+        "yaw": 1.7655877731841745,
+        "pitch": 28.49874198715357
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:19.163993Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 14,
+        "yaw": 1.5072586121313534,
+        "pitch": 27.817794852686855
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:20.189564Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 15,
+        "yaw": -0.10205187212800032,
+        "pitch": 28.16276133840813
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:21.015958Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 16,
+        "yaw": 0.2732109274752537,
+        "pitch": 27.065849871067638
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:21.070873Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 17,
+        "yaw": 1.3786747641932795,
+        "pitch": 27.67207519426993
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:21.118385Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 18,
+        "yaw": 0.42942763953553004,
+        "pitch": 26.982360532897196
+      }
+    },
+    {
+      "ts": "2025-11-27T05:59:22.491379Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764223162.0496027,
+  "lookaway_counter": 18,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

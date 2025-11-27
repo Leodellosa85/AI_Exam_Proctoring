@@ -1,10 +1,10 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from ....core.session_manager import get_session, create_session, save_session_log
-from ....core.logger import log_event
-from ....core.counters import handle_multiperson, handle_lookaway
-from ....utils.image import base64_to_bytes, pil_from_bytes
-from ....detection.mediapipe_detector import MediapipeDetector
-from ....config.settings import FACE_ABSENCE_TIMEOUT, LOOKAWAY_MIN_ANGLE
+from ...core.session_manager import get_session, create_session, save_session_log
+from ...core.logger import log_event
+from ...core.counters import handle_multiperson, handle_lookaway
+from ...utils.image import base64_to_bytes, pil_from_bytes
+from ...detection.mediapipe_detector import MediapipeDetector
+from ...config.settings import FACE_ABSENCE_TIMEOUT, LOOKAWAY_MIN_ANGLE
 
 import time
 from PIL import Image
