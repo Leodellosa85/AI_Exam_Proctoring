@@ -1,0 +1,22 @@
+{
+  "created_at": "2025-11-25T02:13:34.468274Z",
+  "events": [
+    {
+      "ts": "2025-11-25T02:13:34.468274Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-25T02:15:14.676831Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764036814.4682739,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": false
+}

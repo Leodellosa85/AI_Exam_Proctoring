@@ -1,0 +1,126 @@
+{
+  "created_at": "2025-11-27T03:25:19.779923Z",
+  "events": [
+    {
+      "ts": "2025-11-27T03:25:19.780912Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T03:25:19.781922Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T03:25:20.639112Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:20.646109Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:21.165937Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 0.9620999172973191,
+        "pitch": 29.615237929541305
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:23.394832Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:23.399849Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:25.107958Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 6.6261058447730585,
+        "pitch": 25.527600745031926
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:25.555499Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": 12.355973444413909,
+        "pitch": 25.023289259803995
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:25.901161Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:25.901161Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:26.045606Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": 17.1535645941399,
+        "pitch": 25.13832184161897
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:26.045606Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:26.959351Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:26.961378Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T03:25:37.418129Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764213929.406315,
+  "lookaway_counter": 4,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Proctoring Test</title>
+    <style>
+        video {
+            width: 320px;
+            border: 2px solid #333;
+            border-radius: 6px;
+        }
+        #status-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>FastAPI + Django – AI Proctoring Test</h2>
+
+<button id="startBtn">Start Session</button>
+<button id="endBtn" disabled>End Session</button>
+
+<div id="sessionInfo"></div>
+
+<br>
+
+<video id="video" autoplay></video>
+
+<div id="status-box">
+    <strong>Status:</strong>
+    <pre id="status"></pre>
+</div>
+
+<script>
+let sessionId = null;
+let intervalId = null;
+
+// ===============================
+// Start Session
+// ===============================
+document.getElementById("startBtn").onclick = async function () {
+    const res = await fetch("/exam/start/", {
+        method: "POST"
+    });
+
+    const data = await res.json();
+    sessionId = data.session_id;
+
+    document.getElementById("sessionInfo").innerHTML =
+        "<b>Session Started:</b> " + sessionId;
+
+    document.getElementById("endBtn").disabled = false;
+
+    startWebcam();
+    startSendingFrames();
+};
+
+// ===============================
+// Webcam init
+// ===============================
+async function startWebcam() {
+    const video = document.getElementById("video");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+}
+
+// ===============================
+// Capture & send frames to Django
+// ===============================
+function startSendingFrames() {
+    const video = document.getElementById("video");
+    const canvas = document.createElement("canvas");
+
+    intervalId = setInterval(async () => {
+        if (!sessionId) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        canvas.toBlob(async function (blob) {
+            const formData = new FormData();
+            formData.append("session_id", sessionId);
+            formData.append("frame", blob, "frame.jpg");
+
+            try {
+                const res = await fetch("/exam/frame/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await res.json();
+                document.getElementById("status").innerText =
+                    JSON.stringify(result, null, 2);
+
+            } catch (err) {
+                console.log("Frame send error:", err);
+            }
+
+        }, "image/jpeg");
+    }, 1000); // every 1 second
+}
+
+// ===============================
+// End Session
+// ===============================
+document.getElementById("endBtn").onclick = async function () {
+    if (!sessionId) return;
+
+    const formData = new FormData();
+    formData.append("session_id", sessionId);
+
+    const res = await fetch("/exam/end/", {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await res.json();
+    document.getElementById("status").innerText =
+        JSON.stringify(result, null, 2);
+
+    clearInterval(intervalId);
+    sessionId = null;
+    document.getElementById("endBtn").disabled = true;
+};
+</script>
+
+</body>
+</html>

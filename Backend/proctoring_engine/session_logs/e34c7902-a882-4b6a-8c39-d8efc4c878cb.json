@@ -1,0 +1,91 @@
+{
+  "created_at": "2025-11-27T01:04:11.857055Z",
+  "events": [
+    {
+      "ts": "2025-11-27T01:04:11.857055Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T01:04:11.857055Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T01:04:14.443062Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 5.099134215786213,
+        "pitch": 25.01949053644042
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:22.414471Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:22.415469Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:23.453786Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 3.358866469175619,
+        "pitch": 25.17560089554845
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:25.443384Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": 3.0986745961531414,
+        "pitch": 25.180532961868728
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:27.469689Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": 1.6149221979528172,
+        "pitch": 25.520916431210484
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:27.470785Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:29.932033Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 5,
+        "yaw": 48.519899977594896,
+        "pitch": 37.64795431931326
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:31.291039Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764205470.892115,
+  "lookaway_counter": 5,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

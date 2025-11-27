@@ -1,0 +1,288 @@
+{
+  "created_at": "2025-11-25T06:40:24.302379Z",
+  "events": [
+    {
+      "ts": "2025-11-25T06:40:24.302379Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-25T06:40:28.445324Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 5.5788141107986196,
+        "pitch": 25.23592215837115
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:29.428882Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 5.125626388250599,
+        "pitch": 25.077505238597787
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:34.390652Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:34.391624Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:35.507481Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": 10.954755432932437,
+        "pitch": 25.414349599602392
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:37.567657Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": 6.2608966895727605,
+        "pitch": 25.486969832569773
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:37.567657Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:40.423892Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:40.423892Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:41.437772Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 5,
+        "yaw": 4.021563990995125,
+        "pitch": 26.01634924814148
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:42.425220Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 6,
+        "yaw": 0.7345246322426118,
+        "pitch": 25.673275057727313
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:43.373056Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:43.374071Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:45.472400Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 7,
+        "yaw": 10.718297000888386,
+        "pitch": 26.554151716994447
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:46.395623Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:46.397617Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:47.471957Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 8,
+        "yaw": 9.793498190765938,
+        "pitch": 25.56643279227149
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:48.470120Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 9,
+        "yaw": 9.379641204708793,
+        "pitch": 27.17631025788499
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:49.533077Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 10,
+        "yaw": 7.683123847143908,
+        "pitch": 25.845757450736084
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:53.421647Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:53.421647Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:56.454674Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:56.454674Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:40:56.555817Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 11,
+        "yaw": 6.369959085985887,
+        "pitch": 25.206905394163776
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:00.439586Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:00.440585Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:02.491304Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 12,
+        "yaw": 3.756580025829307,
+        "pitch": 27.526160209362278
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:07.551558Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 13,
+        "yaw": -7.347337843480715,
+        "pitch": 35.22855389949315
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:08.539173Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 14,
+        "yaw": -11.458551015968137,
+        "pitch": 30.242182429084902
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:10.453577Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 15,
+        "yaw": 5.88274797016709,
+        "pitch": 25.249541143433085
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:21.379528Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:22.440608Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:23.371991Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:24.437151Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:41:24.797645Z",
+      "type": "session_ended",
+      "detail": {}
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764052872.4374187,
+  "lookaway_counter": 15,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

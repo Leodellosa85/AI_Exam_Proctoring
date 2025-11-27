@@ -1,0 +1,187 @@
+{
+  "created_at": "2025-11-26T02:46:01.521607Z",
+  "events": [
+    {
+      "ts": "2025-11-26T02:46:01.521607Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-26T02:46:01.521607Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-26T02:46:04.110648Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 0.27471380596010414,
+        "pitch": 25.287976783154107
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:04.620550Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 0.5713550036563255,
+        "pitch": 27.2696538123209
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:05.173149Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": 0.812703048287567,
+        "pitch": 25.96322574420481
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:05.713683Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": -0.08094480515801063,
+        "pitch": 27.2525102505918
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:05.713683Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:06.727282Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 5,
+        "yaw": 0.332131844359512,
+        "pitch": 27.138702206530336
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:07.726559Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 6,
+        "yaw": 0.3200631916090991,
+        "pitch": 27.534028301607975
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:08.759752Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 7,
+        "yaw": 0.2526090077251923,
+        "pitch": 27.687831382226296
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:09.494162Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 8,
+        "yaw": 1.0860439512359807,
+        "pitch": 26.90744757990398
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:09.656106Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 9,
+        "yaw": 0.5172628550999911,
+        "pitch": 27.007534886244354
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:10.168686Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 10,
+        "yaw": 2.1574511695498337,
+        "pitch": 26.820052500715448
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:10.712606Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 11,
+        "yaw": 2.558890012645519,
+        "pitch": 26.244159811547984
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:11.208295Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 12,
+        "yaw": 1.5629654691188817,
+        "pitch": 26.48181128222427
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:11.721586Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 13,
+        "yaw": 2.274168649680617,
+        "pitch": 26.864800841157425
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:12.211181Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 14,
+        "yaw": 1.6427910698917736,
+        "pitch": 25.27766127023632
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:12.678248Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 15,
+        "yaw": 2.068433185244241,
+        "pitch": 25.171800580952976
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:13.163373Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 16,
+        "yaw": 2.2287214775479574,
+        "pitch": 26.845822969325596
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:13.697642Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 17,
+        "yaw": 1.670139359476782,
+        "pitch": 26.722763043487387
+      }
+    },
+    {
+      "ts": "2025-11-26T02:46:22.174636Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764125174.10116,
+  "lookaway_counter": 17,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

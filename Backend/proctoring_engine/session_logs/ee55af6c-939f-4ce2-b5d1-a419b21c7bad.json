@@ -1,0 +1,79 @@
+{
+  "created_at": "2025-11-27T01:03:52.336289Z",
+  "events": [
+    {
+      "ts": "2025-11-27T01:03:52.336289Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T01:03:52.336289Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T01:03:54.947415Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 7.572902654323658,
+        "pitch": 27.246098479527102
+      }
+    },
+    {
+      "ts": "2025-11-27T01:03:55.407219Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 8.46032081822196,
+        "pitch": 28.69636774710111
+      }
+    },
+    {
+      "ts": "2025-11-27T01:03:55.910999Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 3,
+        "yaw": 6.369731932620628,
+        "pitch": 27.547120395145956
+      }
+    },
+    {
+      "ts": "2025-11-27T01:03:56.479795Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 4,
+        "yaw": 3.679461625025942,
+        "pitch": 25.70288745532675
+      }
+    },
+    {
+      "ts": "2025-11-27T01:03:56.479795Z",
+      "type": "flag_lookaway",
+      "detail": {
+        "count": 4
+      }
+    },
+    {
+      "ts": "2025-11-27T01:03:57.457250Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 5,
+        "yaw": 3.8159302548623866,
+        "pitch": 25.60789719990423
+      }
+    },
+    {
+      "ts": "2025-11-27T01:04:06.417645Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764205437.893508,
+  "lookaway_counter": 5,
+  "flag_lookaway": true,
+  "flag_multi": false
+}

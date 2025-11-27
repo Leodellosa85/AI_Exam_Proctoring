@@ -1,0 +1,38 @@
+{
+  "created_at": "2025-11-25T03:39:34.318426Z",
+  "events": [
+    {
+      "ts": "2025-11-25T03:39:34.318426Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-25T03:39:40.537872Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 1,
+        "yaw": 13.644169489424431,
+        "pitch": 26.912488435064404
+      }
+    },
+    {
+      "ts": "2025-11-25T03:39:43.509937Z",
+      "type": "warning_lookaway",
+      "detail": {
+        "count": 2,
+        "yaw": 10.03385977529182,
+        "pitch": 25.690187553450965
+      }
+    },
+    {
+      "ts": "2025-11-25T03:39:52.840301Z",
+      "type": "session_ended",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764041987.410908,
+  "lookaway_counter": 2,
+  "flag_lookaway": false,
+  "flag_multi": false
+}

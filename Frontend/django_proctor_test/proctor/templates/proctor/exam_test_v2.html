@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Proctoring Test</title>
+    <style>
+        video {
+            width: 320px;
+            border: 2px solid #333;
+            border-radius: 6px;
+        }
+
+        #status-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2>FastAPI + Django – AI Proctoring Test</h2>
+    <select id="modeSelect">
+        <option value="file">Send as File (Blob Upload)</option>
+        <option value="base64">Send as Base64</option>
+    </select>
+    <br><br>
+    <button id="startBtn">Start Session</button>
+    <button id="endBtn" disabled>End Session</button>
+    <div id="sessionInfo"></div>
+    <br>
+
+    <video id="video" autoplay></video>
+    <div id="status-box">
+        <strong>Status:</strong>
+        <pre id="status"></pre>
+    </div>
+<script>
+let sessionId = null;
+let intervalId = null;
+
+
+// Start Session
+// --------------------------------------------------
+document.getElementById("startBtn").onclick = async function () {
+    const res = await fetch("/exam/start/", { method: "POST" });
+    const data = await res.json();
+    sessionId = data.session_id;
+
+    document.getElementById("sessionInfo").innerHTML =
+    "<b>Session Started:</b> " + sessionId;
+
+    document.getElementById("endBtn").disabled = false;
+    startWebcam();
+    startSendingFrames();
+};
+
+// Webcam initialization
+// --------------------------------------------------
+async function startWebcam() {
+    const video = document.getElementById("video");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+}
+
+// Sending Frames Every Second (File or Base64)
+// --------------------------------------------------
+function startSendingFrames() {
+    const video = document.getElementById("video");
+    const canvas = document.createElement("canvas");
+
+    intervalId = setInterval(async () => {
+        if (!sessionId) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    const mode = document.getElementById("modeSelect").value;
+
+    if (mode === "file") {
+    // ---- FILE MODE ----
+        canvas.toBlob(async function (blob) {
+        const formData = new FormData();
+        formData.append("session_id", sessionId);
+        formData.append("frame", blob, "frame.jpg");
+
+        const res = await fetch("/exam/frame/", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await res.json();
+            document.getElementById("status").innerText = JSON.stringify(result, null, 2);
+        }, "image/jpeg");
+    } else {
+        // ---- BASE64 MODE ----
+        const b64 = canvas.toDataURL("image/jpeg");
+        const formData = new FormData();
+        formData.append("session_id", sessionId);
+        formData.append("b64", b64);
+        const res = await fetch("/exam/frame_b64/", {
+            method: "POST", 
+            body: formData
+    });
+
+        const result = await res.json();
+            document.getElementById("status").innerText = JSON.stringify(result, null, 2);  
+    }
+    }, 1000);
+}
+
+// End Session
+// --------------------------------------------------
+document.getElementById("endBtn").onclick = async function () {
+    if (!sessionId) return;
+
+    const formData = new FormData();
+    formData.append("session_id", sessionId);
+    const res = await fetch("/exam/end/", {
+        method: "POST",
+        body: formData
+    });
+    const result = await res.json();
+    document.getElementById("status").innerText = JSON.stringify(result, null, 2);
+    clearInterval(intervalId);
+    sessionId = null;
+    document.getElementById("endBtn").disabled = true;
+    };
+
+</script>
+</body>
+</html>

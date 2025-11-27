@@ -1,0 +1,78 @@
+{
+  "created_at": "2025-11-25T06:29:02.813188Z",
+  "events": [
+    {
+      "ts": "2025-11-25T06:29:02.813188Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-25T06:29:10.858211Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:11.868119Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:12.856960Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:13.855938Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:14.849558Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:15.860518Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:16.870946Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:19.151735Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    },
+    {
+      "ts": "2025-11-25T06:29:19.179310Z",
+      "type": "terminate_exam",
+      "detail": {
+        "reason": "face_absent"
+      }
+    }
+  ],
+  "terminated": true,
+  "last_face_seen": 1764052142.8131886,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": false
+}

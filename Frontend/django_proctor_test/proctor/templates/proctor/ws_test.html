@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Proctoring Test – WebSocket Only</title>
+    <style>
+        video {
+            width: 320px;
+            border: 2px solid #333;
+            border-radius: 6px;
+        }
+        #status-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>FastAPI AI Proctoring – WebSocket Only</h2>
+
+<button id="startBtn">Start Session</button>
+<button id="endBtn" disabled>End Session</button>
+
+<div id="sessionInfo"></div>
+
+<br>
+
+<video id="video" autoplay></video>
+
+<div id="status-box">
+    <strong>Status:</strong>
+    <pre id="status"></pre>
+</div>
+
+<script>
+let sessionId = null;
+let ws = null;
+let captureInterval = null;
+
+// ===============================
+// Start Session (WebSocket handles session creation)
+// ===============================
+document.getElementById("startBtn").onclick = async function () {
+    sessionId = crypto.randomUUID();  // Generate a client-side session ID
+    document.getElementById("sessionInfo").innerHTML =
+        "<b>Session Started:</b> " + sessionId;
+
+    document.getElementById("endBtn").disabled = false;
+
+    await startWebcam();
+    startWebSocket();
+};
+
+// ===============================
+// Initialize webcam
+// ===============================
+async function startWebcam() {
+    const video = document.getElementById("video");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+}
+
+// ===============================
+// Initialize WebSocket & send frames
+// ===============================
+function startWebSocket() {
+    if (!sessionId) return;
+
+    // Replace host/port with your FastAPI server
+    ws = new WebSocket(`ws://127.0.0.1:8001/ws/v1/ws/${sessionId}`);
+    ws.binaryType = "arraybuffer";
+
+    ws.onopen = () => {
+        console.log("WebSocket connected");
+        startSendingFrames();
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        document.getElementById("status").innerText = JSON.stringify(data, null, 2);
+
+        if (data.terminate) {
+            stopSession();
+            alert("Session terminated by server!");
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket disconnected");
+        stopSession();
+    };
+}
+
+// ===============================
+// Capture webcam frames & send as binary
+// ===============================
+function startSendingFrames() {
+    const video = document.getElementById("video");
+    const canvas = document.createElement("canvas");
+
+    captureInterval = setInterval(() => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+            if (blob) {
+                blob.arrayBuffer().then(buffer => ws.send(buffer));
+            }
+        }, "image/jpeg");
+    }, 500); // every 0.5 sec
+}
+
+// ===============================
+// End session (client closes WebSocket)
+// ===============================
+document.getElementById("endBtn").onclick = stopSession;
+
+function stopSession() {
+    if (captureInterval) clearInterval(captureInterval);
+    captureInterval = null;
+
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    ws = null;
+
+    sessionId = null;
+    document.getElementById("endBtn").disabled = true;
+    document.getElementById("sessionInfo").innerHTML = "";
+    document.getElementById("status").innerText = "";
+}
+</script>
+
+</body>
+</html>
