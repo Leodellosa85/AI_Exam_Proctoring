@@ -1,0 +1,25 @@
+{
+  "created_at": "2025-11-27T07:47:32.054282Z",
+  "events": [
+    {
+      "ts": "2025-11-27T07:47:32.054282Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T07:47:32.054282Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T07:47:47.780650Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764229652.0542824,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": false
+}

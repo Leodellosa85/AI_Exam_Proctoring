@@ -15,12 +15,9 @@ class HF_MediaPipe_Detector:
     - MediaPipe handles head pose (yaw/pitch)
     """
 
-    def __init__(self):
-        # -----------------------------
-        #  Load Hugging Face Model
-        # -----------------------------
+    def __init__(self, score_threshold=0.5):
         self.enabled_hf = False
-
+        self.score_threshold = score_threshold
         if HF_MODEL_REPO_ID:
             try:
                 self.processor = AutoProcessor.from_pretrained(HF_MODEL_REPO_ID)
@@ -30,6 +27,9 @@ class HF_MediaPipe_Detector:
                 print(f"[HF] Loaded model: {HF_MODEL_REPO_ID}")
             except Exception as e:
                 print("[HF] Failed to load model:", e)
+
+        else:
+            print("[HF] No model ID provided")
 
         # -----------------------------
         #  Load MediaPipe components
@@ -47,24 +47,27 @@ class HF_MediaPipe_Detector:
         """Return number of faces detected in a PIL Image using HF model."""
         if not self.enabled_hf:
             return -1
+        try:
+            inputs = self.processor(images=img, return_tensors="pt")
 
-        inputs = self.processor(images=img, return_tensors="pt")
+            with torch.no_grad():
+                out = self.model(**inputs)
 
-        with torch.no_grad():
-            out = self.model(**inputs)
+            # If logits exist → DETR/YOLO-like model
+            if hasattr(out, "logits"):
+                scores = out.logits.softmax(-1)[..., :-1].max(-1).values
+                num_faces = (scores > self.score_threshold).sum().item()
+                return int(num_faces)
 
-        # If logits exist → DETR/YOLO-like model
-        if hasattr(out, "logits"):
-            scores = out.logits.softmax(-1)[..., :-1].max(-1).values
-            num_faces = (scores > 0.5).sum().item()
-            return int(num_faces)
+            # If scores exist → SSD-style model
+            if hasattr(out, "scores"):
+                num_faces = (out.scores > self.score_threshold).sum().item()
+                return int(num_faces)
 
-        # If scores exist → SSD-style model
-        if hasattr(out, "scores"):
-            num_faces = (out.scores > 0.5).sum().item()
-            return int(num_faces)
-
-        return 0
+            return 0
+        except Exception as e:
+            print("[HF] Detection error:", e)
+            return -1
 
     # ------------------------------------------------------------
     # 🔵 HEAD POSE USING MEDIAPIPE

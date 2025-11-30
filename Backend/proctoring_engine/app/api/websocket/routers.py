@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket
 from .websocket import DirectionWebSocket
-from ...detection.hf_mediapipe_detector import HF_MediaPipe_Detector
+from ...detection.face_detector import HF_MediaPipe_Detector
 
 router = APIRouter()
 

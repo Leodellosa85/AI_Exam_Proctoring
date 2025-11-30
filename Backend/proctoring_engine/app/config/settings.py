@@ -10,5 +10,7 @@ DETECTION_FPS = int(os.getenv("DETECTION_FPS", 6))
 
 LOG_DIR = os.getenv("LOG_DIR", "./session_logs")
 HF_MODEL_REPO_ID = os.getenv("HF_MODEL_REPO_ID", None)
+HF_FACE_DETECT_MODEL = os.getenv("HF_FACE_DETECT_MODEL", None)
+HF_LIVENESS_MODEL = os.getenv("HF_LIVENESS_MODEL", None)
 
 os.makedirs(LOG_DIR, exist_ok=True)

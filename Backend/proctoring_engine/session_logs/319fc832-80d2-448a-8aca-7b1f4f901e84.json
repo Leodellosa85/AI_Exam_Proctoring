@@ -1,0 +1,39 @@
+{
+  "created_at": "2025-11-27T08:13:35.740830Z",
+  "events": [
+    {
+      "ts": "2025-11-27T08:13:35.740830Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T08:13:35.740830Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-27T08:13:37.181706Z",
+      "type": "warning_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T08:13:37.181706Z",
+      "type": "flag_multiperson",
+      "detail": {
+        "faces": 2
+      }
+    },
+    {
+      "ts": "2025-11-27T08:20:32.136106Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764231219.455505,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": true
+}
