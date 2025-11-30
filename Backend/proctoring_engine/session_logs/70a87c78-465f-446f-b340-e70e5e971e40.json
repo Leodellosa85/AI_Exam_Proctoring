@@ -1,0 +1,348 @@
+{
+  "created_at": "2025-11-30T04:13:00.884787Z",
+  "events": [
+    {
+      "ts": "2025-11-30T04:13:00.884787Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-30T04:13:00.884787Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-30T04:13:01.436091Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:01.908420Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:02.417929Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:02.913504Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:03.421173Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:03.929268Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:04.407241Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:06.408444Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:06.900760Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:07.417184Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:07.907196Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:08.405496Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:08.905869Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:09.417247Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:10.419679Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:10.921107Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:11.419098Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:11.943901Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:12.412134Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:12.922278Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:13.428101Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:15.422049Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:15.927610Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:16.418516Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:19.910551Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:20.420620Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:20.913875Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:21.422946Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:21.910522Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:22.437390Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:22.913744Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:23.413819Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:23.909069Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:24.421195Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:24.913623Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:25.427825Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:25.911837Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:26.443789Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:26.913590Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:27.413643Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:28.435823Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:28.913673Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:29.413652Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:29.907361Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:30.417123Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:30.913759Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T04:13:31.159082Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764476010.9137595,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": false,
+  "flag_spoof": true
+}

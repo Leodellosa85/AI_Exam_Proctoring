@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Proctoring Test – WebSocket Only</title>
+    <style>
+        video {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #333;
+            border-radius: 6px;
+            display: block;
+        }
+        #status-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+        }
+        #video-container {
+            position: relative;
+            display: inline-block;
+            width: 320px;
+            height: 240px;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>FastAPI AI Proctoring – WebSocket Only</h2>
+
+<button id="startBtn">Start Session</button>
+<button id="endBtn" disabled>End Session</button>
+
+<div id="sessionInfo"></div>
+
+<br>
+
+<div id="video-container">
+    <video id="video" autoplay></video>
+    <canvas id="overlay"></canvas>
+</div>
+
+<div id="status-box">
+    <strong>Status:</strong>
+    <pre id="status"></pre>
+</div>
+
+<script>
+let sessionId = null;
+let ws = null;
+let captureInterval = null;
+
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const ctx = overlay.getContext("2d");
+
+// ===============================
+// Start webcam
+// ===============================
+async function startWebcam() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+
+    video.onloadedmetadata = () => {
+        overlay.width = video.videoWidth;
+        overlay.height = video.videoHeight;
+    };
+}
+
+// ===============================
+// WebSocket
+// ===============================
+function startWebSocket() {
+    if (!sessionId) return;
+
+    ws = new WebSocket(`ws://127.0.0.1:8001/ws/${sessionId}`);
+    ws.binaryType = "arraybuffer";
+
+    ws.onopen = () => {
+        console.log("WebSocket connected");
+        startSendingFrames();
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        document.getElementById("status").innerText = JSON.stringify(data, null, 2);
+
+        // Clear overlay
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+        // Draw bounding boxes
+        if (data.boxes) {
+            data.boxes.forEach(box => {
+                // If backend sends normalized coordinates (0–1), scale them
+                const x = box.x * video.videoWidth;
+                const y = box.y * video.videoHeight;
+                const w = box.width * video.videoWidth;
+                const h = box.height * video.videoHeight;
+
+                ctx.strokeStyle = data.liveness === "real" ? "lime" : "red";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, w, h);
+            });
+        }
+
+        if (data.terminate) {
+            stopSession();
+            alert("Session terminated by server!");
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket disconnected");
+        stopSession();
+    };
+}
+
+// ===============================
+// Send frames
+// ===============================
+function startSendingFrames() {
+    const canvas = document.createElement("canvas");
+
+    captureInterval = setInterval(() => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx2 = canvas.getContext("2d");
+        ctx2.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+            if (blob) blob.arrayBuffer().then(buffer => ws.send(buffer));
+        }, "image/jpeg");
+    }, 500);
+}
+
+// ===============================
+// Start / Stop
+// ===============================
+document.getElementById("startBtn").onclick = async () => {
+    sessionId = crypto.randomUUID();
+    document.getElementById("sessionInfo").innerHTML = "<b>Session Started:</b> " + sessionId;
+    document.getElementById("endBtn").disabled = false;
+
+    await startWebcam();
+    startWebSocket();
+};
+
+document.getElementById("endBtn").onclick = stopSession;
+
+function stopSession() {
+    if (captureInterval) clearInterval(captureInterval);
+    captureInterval = null;
+
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    ws = null;
+
+    sessionId = null;
+    document.getElementById("endBtn").disabled = true;
+    document.getElementById("sessionInfo").innerHTML = "";
+    document.getElementById("status").innerText = "";
+
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+}
+</script>
+
+</body>
+</html>

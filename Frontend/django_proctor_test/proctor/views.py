@@ -116,4 +116,4 @@ def test_page(request):
     return render(request, "proctor/exam_test_v2.html")
 
 def ws_test_page(request):
-    return render(request, "proctor/ws_test.html")
+    return render(request, "proctor/ws_test_v2.html")

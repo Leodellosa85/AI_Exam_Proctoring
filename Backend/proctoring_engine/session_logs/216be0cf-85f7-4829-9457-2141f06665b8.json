@@ -1,0 +1,292 @@
+{
+  "created_at": "2025-11-30T03:55:41.183846Z",
+  "events": [
+    {
+      "ts": "2025-11-30T03:55:41.183846Z",
+      "type": "session_started",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-30T03:55:41.184843Z",
+      "type": "ws_connected",
+      "detail": {}
+    },
+    {
+      "ts": "2025-11-30T03:55:41.770640Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:42.241015Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:42.724933Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:43.229640Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:43.741912Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:44.236874Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:44.740740Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:45.220896Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:45.741212Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:46.230905Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:46.735179Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:47.223125Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:47.733682Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:48.247548Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:48.726799Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:49.195503Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:49.740544Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:50.234516Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:50.735353Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:51.247852Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:51.749535Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:52.240706Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:52.743582Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:53.240705Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:53.728173Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:54.445847Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:55.479628Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:56.456865Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:57.450195Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:57.737134Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:58.452882Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:59.444946Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:55:59.942131Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:00.213249Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:00.708897Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:01.203632Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:01.722836Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:02.211912Z",
+      "type": "spoof_detected",
+      "detail": {
+        "status": "unknown"
+      }
+    },
+    {
+      "ts": "2025-11-30T03:56:02.386022Z",
+      "type": "ws_disconnected",
+      "detail": {}
+    }
+  ],
+  "terminated": false,
+  "last_face_seen": 1764474962.200207,
+  "lookaway_counter": 0,
+  "flag_lookaway": false,
+  "flag_multi": false,
+  "flag_spoof": true
+}
