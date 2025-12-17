@@ -1,6 +1,18 @@
+# Using 12 points landmark
 
+# --- 12-POINT MAPPING DEFINITION ---
+# MediaPipe indices (468) corresponding to 12 key points
+MEDIAPIPE_TO_12_INDICES = [
+    1, 152, 33, 263, 61, 291, 133, 362, 98, 327, 66, 296
+]
 
-# 3) Modular 5-point landmark detector
+# GT 68 indices that correspond to the 12 points above (0-based)
+GT_12_INDICES = [
+    30, 8, 36, 45, 48, 54, 39, 42, 31, 35, 21, 24
+]
+# ============================
+
+# 3) Modular 12-point landmark detector
 
 class LandmarkDetector:
     def __init__(self, model_name='mediapipe'):
@@ -17,15 +29,17 @@ class LandmarkDetector:
 
     def detect_landmarks(self, image_bgr):
         """
-        Return list of 5 (x,y) coordinates in pixels or None if no face detected.
+        Return list of 12 (x,y) coordinates in pixels or None if no face detected.
         """
         if self.model_name == 'mediapipe' and self.face_mesh:
             image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
             results = self.face_mesh.process(image_rgb)
             if results and results.multi_face_landmarks:
                 lm = results.multi_face_landmarks[0].landmark
-                # 5 key points: right_eye, left_eye, nose tip, left_mouth, right_mouth (MediaPipe indices)
-                indices = [33, 263, 1, 61, 291]
+
+                # --- CHANGE 2: Use the 12-point MediaPipe indices ---
+                indices = MEDIAPIPE_TO_12_INDICES
+
                 h, w = image_bgr.shape[:2]
                 return [(lm[i].x * w, lm[i].y * h) for i in indices]
         return None
@@ -34,12 +48,11 @@ class LandmarkDetector:
         if self.model_name == 'mediapipe' and self.face_mesh:
             pass
 
-# 4) Head-pose computation
-
+# 4) Head-pose computation (No change needed here as it handles N points)
 def compute_head_pose(landmarks_2d, landmarks_3d, image_shape=None):
     """
-    landmarks_2d: list of (x,y) pixels
-    landmarks_3d: list of corresponding (X,Y,Z)
+    landmarks_2d: list of 12 (x,y) pixels
+    landmarks_3d: list of 12 corresponding (X,Y,Z)
     Returns: pitch, yaw, roll in degrees
     """
     image_points = np.array(landmarks_2d, dtype=np.float64)
@@ -89,8 +102,9 @@ def compute_head_pose(landmarks_2d, landmarks_3d, image_shape=None):
 jpgs = sorted([f for f in os.listdir(DATASET_PATH) if f.lower().endswith('.jpg')])[:NUM_IMAGES]
 print(f"Found {len(jpgs)} images to process.")
 
-# GT indices for 5 points (AFLW 68-point mapping)
-GT_INDICES = [36, 45, 30, 48, 54]
+# --- CHANGE 3: Update Global GT_INDICES ---
+# GT indices for 12 points (AFLW 68-point mapping)
+GT_INDICES = GT_12_INDICES
 
 detector = LandmarkDetector('mediapipe')
 
@@ -133,19 +147,15 @@ for img_name in jpgs:
 
     # --- DETECTION RATE LOGIC START ---
 
-    # If we reached here, the image contains a valid GT face data.
     total_gt_faces += 1
 
-    # detect landmarks (2D pixel coordinates)
+    # detect landmarks (2D pixel coordinates) - now 12 points
     landmarks_2d = detector.detect_landmarks(image)
 
     if landmarks_2d is None:
-        # Case: Ground Truth exists, but detector MISSED it (False Negative)
         false_negatives += 1
-        # print(f"FN: Face NOT detected in {img_name}") # Optional debug
         continue
 
-    # Case: Ground Truth exists, and detector FOUND it (True Positive)
     true_positives += 1
 
     # --- DETECTION RATE LOGIC END ---
@@ -157,7 +167,7 @@ for img_name in jpgs:
     gt_yaw   = np.degrees(pose_arr[1])
     gt_roll  = np.degrees(pose_arr[2])
 
-    # map GT 3D points for the 5 landmarks
+    # map GT 3D points for the 12 landmarks
     try:
         landmarks_3d = [pt3d[idx] for idx in GT_INDICES]
     except IndexError:
@@ -183,7 +193,8 @@ for img_name in jpgs:
     per_point_errors.append(current_per_point_error)
 
     processed += 1
-    # print(f"[{processed}] {img_name}  err_pitch={pitch_errors[-1]:.2f}, err_yaw={yaw_errors[-1]:.2f}, err_roll={roll_errors[-1]:.2f}, mean_5pt_error={per_point_errors[-1]:.1f}")
+    # --- CHANGE 4: Update Logging ---
+    # print(f"[{processed}] {img_name}  err_pitch={pitch_errors[-1]:.2f}, err_yaw={yaw_errors[-1]:.2f}, err_roll={roll_errors[-1]:.2f}, mean_12pt_error={per_point_errors[-1]:.1f}")
 
 
 detector.close()
@@ -205,6 +216,7 @@ if processed > 0:
     print(f"Mean Pitch Error: {np.mean(pitch_errors):.2f}°")
     print(f"Mean Yaw Error:   {np.mean(yaw_errors):.2f}°")
     print(f"Mean Roll Error:  {np.mean(roll_errors):.2f}°")
-    print(f"Mean 5-point Euclidean error: {np.mean(per_point_errors):.1f} px")
+    # --- CHANGE 4: Update Summary ---
+    print(f"Mean 12-point Euclidean error: {np.mean(per_point_errors):.1f} px")
 else:
     print("No images processed successfully for pose estimation.")

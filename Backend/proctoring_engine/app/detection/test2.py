@@ -1,6 +1,29 @@
+# Using 6 point landmark
 
+# --- 6-POINT MAPPING DEFINITION ---
+# The 6 most robust points for PnP (Nose Tip, Chin, Outer Eyes, Mouth Corners)
+# MediaPipe indices (468) corresponding to the 6 key points
+MEDIAPIPE_TO_6_INDICES = [
+    1,   # Nose Tip
+    152, # Chin
+    33,  # Left Eye Outer
+    263, # Right Eye Outer
+    61,  # Left Mouth Corner
+    291  # Right Mouth Corner
+]
 
-# 3) Modular 5-point landmark detector
+# GT 68 indices that correspond to the 6 points above (0-based)
+GT_6_INDICES = [
+    30,  # Nose Tip
+    8,   # Chin
+    36,  # Left Eye Outer (Left in image, Right in 3D model)
+    45,  # Right Eye Outer (Right in image, Left in 3D model)
+    48,  # Left Mouth Corner
+    54   # Right Mouth Corner
+]
+# ============================
+
+# 3) Modular 6-point landmark detector
 
 class LandmarkDetector:
     def __init__(self, model_name='mediapipe'):
@@ -17,15 +40,17 @@ class LandmarkDetector:
 
     def detect_landmarks(self, image_bgr):
         """
-        Return list of 5 (x,y) coordinates in pixels or None if no face detected.
+        Return list of 6 (x,y) coordinates in pixels or None if no face detected.
         """
         if self.model_name == 'mediapipe' and self.face_mesh:
             image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
             results = self.face_mesh.process(image_rgb)
             if results and results.multi_face_landmarks:
                 lm = results.multi_face_landmarks[0].landmark
-                # 5 key points: right_eye, left_eye, nose tip, left_mouth, right_mouth (MediaPipe indices)
-                indices = [33, 263, 1, 61, 291]
+
+                # --- CHANGE: Use the 6-point MediaPipe indices ---
+                indices = MEDIAPIPE_TO_6_INDICES
+
                 h, w = image_bgr.shape[:2]
                 return [(lm[i].x * w, lm[i].y * h) for i in indices]
         return None
@@ -35,11 +60,10 @@ class LandmarkDetector:
             pass
 
 # 4) Head-pose computation
-
 def compute_head_pose(landmarks_2d, landmarks_3d, image_shape=None):
     """
-    landmarks_2d: list of (x,y) pixels
-    landmarks_3d: list of corresponding (X,Y,Z)
+    landmarks_2d: list of 6 (x,y) pixels
+    landmarks_3d: list of 6 corresponding (X,Y,Z)
     Returns: pitch, yaw, roll in degrees
     """
     image_points = np.array(landmarks_2d, dtype=np.float64)
@@ -59,10 +83,12 @@ def compute_head_pose(landmarks_2d, landmarks_3d, image_shape=None):
 
     # SolvePnP
     try:
+        # Use EPNP first (efficient)
         success, rvec, tvec = cv2.solvePnP(model_points, image_points, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_EPNP)
 
+        # Fallback to Iterative/RANSAC for robustness
         if not success:
-            success, rvec, tvec = cv2.solvePnP(model_points, image_points, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
+            success, rvec, tvec = cv2.solvePnP(model_points, image_points, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_RUNSAC)
             if not success:
                 return (np.nan, np.nan, np.nan)
     except Exception:
@@ -89,8 +115,9 @@ def compute_head_pose(landmarks_2d, landmarks_3d, image_shape=None):
 jpgs = sorted([f for f in os.listdir(DATASET_PATH) if f.lower().endswith('.jpg')])[:NUM_IMAGES]
 print(f"Found {len(jpgs)} images to process.")
 
-# GT indices for 5 points (AFLW 68-point mapping)
-GT_INDICES = [36, 45, 30, 48, 54]
+# --- CHANGE: Update Global GT_INDICES ---
+# GT indices for 6 points (AFLW 68-point mapping)
+GT_INDICES = GT_6_INDICES
 
 detector = LandmarkDetector('mediapipe')
 
@@ -133,19 +160,15 @@ for img_name in jpgs:
 
     # --- DETECTION RATE LOGIC START ---
 
-    # If we reached here, the image contains a valid GT face data.
     total_gt_faces += 1
 
-    # detect landmarks (2D pixel coordinates)
+    # detect landmarks (2D pixel coordinates) - now 6 points
     landmarks_2d = detector.detect_landmarks(image)
 
     if landmarks_2d is None:
-        # Case: Ground Truth exists, but detector MISSED it (False Negative)
         false_negatives += 1
-        # print(f"FN: Face NOT detected in {img_name}") # Optional debug
         continue
 
-    # Case: Ground Truth exists, and detector FOUND it (True Positive)
     true_positives += 1
 
     # --- DETECTION RATE LOGIC END ---
@@ -157,7 +180,7 @@ for img_name in jpgs:
     gt_yaw   = np.degrees(pose_arr[1])
     gt_roll  = np.degrees(pose_arr[2])
 
-    # map GT 3D points for the 5 landmarks
+    # map GT 3D points for the 6 landmarks
     try:
         landmarks_3d = [pt3d[idx] for idx in GT_INDICES]
     except IndexError:
@@ -183,7 +206,8 @@ for img_name in jpgs:
     per_point_errors.append(current_per_point_error)
 
     processed += 1
-    # print(f"[{processed}] {img_name}  err_pitch={pitch_errors[-1]:.2f}, err_yaw={yaw_errors[-1]:.2f}, err_roll={roll_errors[-1]:.2f}, mean_5pt_error={per_point_errors[-1]:.1f}")
+    # --- CHANGE: Update Logging for 6-point error ---
+    # print(f"[{processed}] {img_name}  err_pitch={pitch_errors[-1]:.2f}, err_yaw={yaw_errors[-1]:.2f}, err_roll={roll_errors[-1]:.2f}, mean_6pt_error={per_point_errors[-1]:.1f}")
 
 
 detector.close()
@@ -205,6 +229,7 @@ if processed > 0:
     print(f"Mean Pitch Error: {np.mean(pitch_errors):.2f}°")
     print(f"Mean Yaw Error:   {np.mean(yaw_errors):.2f}°")
     print(f"Mean Roll Error:  {np.mean(roll_errors):.2f}°")
-    print(f"Mean 5-point Euclidean error: {np.mean(per_point_errors):.1f} px")
+    # --- CHANGE: Update Summary for 6-point error ---
+    print(f"Mean 6-point Euclidean error: {np.mean(per_point_errors):.1f} px")
 else:
     print("No images processed successfully for pose estimation.")
