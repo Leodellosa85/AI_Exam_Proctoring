@@ -117,3 +117,7 @@ def test_page(request):
 
 def ws_test_page(request):
     return render(request, "proctor/ws_test_v2.html")
+
+def mediapipe_page(request):
+    # return render(request, "proctor/mediapipe.html")
+    return render(request, "proctor/mediapipev2.html")    

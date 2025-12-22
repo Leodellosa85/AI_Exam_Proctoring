@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Proctoring</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a; /* slate-900 */
+      color: #e5e7eb;      /* gray-200 */
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 1000px;
+      max-width: 95%;
+      display: grid;
+      grid-template-columns: auto 300px; /* Video takes available space, Panel is fixed */
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* --- VIDEO CONTAINER --- */
+    .video-box {
+      position: relative;
+      width: 640px; 
+      height: 480px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      margin: 0 auto;
+    }
+
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 480px;
+      object-fit: cover; /* Ensures video fills box without stretching */
+      z-index: 1; 
+      transform: scaleX(-1); /* OPTIONAL: Mirror the webcam like a mirror */
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 480px;
+      z-index: 2; 
+      pointer-events: none; /* Crucial: Lets clicks pass through the canvas */
+      transform: scaleX(-1); /* Must match video mirroring */
+    }
+
+    /* --- SIDE PANEL --- */
+    .panel {
+      background: #1e293b; /* slate-800 */
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 440px; /* Match approx video height */
+    }
+
+    .panel h3 {
+      margin: 0 0 5px 0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8; /* slate-400 */
+      border-bottom: 1px solid #334155;
+      padding-bottom: 5px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .metric span.value {
+      color: #38bdf8; /* cyan-400 */
+      font-weight: bold;
+    }
+
+    /* --- STATUS BOX --- */
+    .status {
+      margin-top: auto; /* Pushes to bottom of panel */
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      background: #334155;
+      color: #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .status.ok { background: #065f46; color: #6ee7b7; border: 1px solid #059669; }
+    .status.warn { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
+    .status.err { background: #450a0a; color: #fecaca; border: 1px solid #991b1b; }
+
+    .guide-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); /* Perfectly centered */
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none; /* Let clicks pass through */
+      z-index: 10; /* Above canvas */
+      display: none; /* Hidden by default */
+      white-space: pre-wrap; /* Allows line breaks */
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      background: #3b82f6; /* blue-500 */
+      color: white;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #2563eb; }
+    button:disabled {
+      background: #475569;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    #endBtn { background: #ef4444; } /* Red for stop */
+    #endBtn:hover { background: #dc2626; }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <!-- VIDEO AREA -->
+    <div class="video-box">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+
+      <!-- NEW: Text Overlay (Not affected by Canvas Mirroring) -->
+      <div id="guide-text" class="guide-text"></div>
+    </div>
+
+    <!-- INFO SIDEBAR -->
+    <div class="panel">
+      
+      <!-- Group 1: Orientation -->
+      <div>
+        <h3>Head Pose</h3>
+        <div class="metric"><span>Yaw</span><span class="value" id="yaw">--</span></div>
+        <div class="metric"><span>Pitch</span><span class="value" id="pitch">--</span></div>
+        <div class="metric"><span>Roll</span><span class="value" id="roll">--</span></div>
+      </div>
+
+      <!-- Group 2: Stats -->
+      <div>
+        <h3>Session Stats</h3>
+        <div class="metric"><span>FPS</span><span class="value" id="fps">0</span></div>
+        <div class="metric"><span>Frames</span><span class="value" id="frames">0</span></div>
+        <div class="metric"><span>Violations</span><span class="value" id="violations">0</span></div>
+      </div>
+
+      <!-- STATUS ELEMENT (Referenced by JS) -->
+      <div id="status" class="status">Ready to Start</div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="controls">
+      <button id="startBtn">Start Exam</button>
+      <button id="endBtn" disabled>End Exam</button>
+    </div>
+  </div>
+
+<!-- SCRIPTS -->
+<script
+    id="proctor-script"
+    src="{% static 'js/proctoringv3.js' %}"
+    type="module"
+    data-model-path="{% static 'models/face_landmarker.task' %}"
+    data-wasm-path="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+    data-ws-url="ws://127.0.0.1:8002/ws/v1/ws/{sessionId}">
+</script>
+
+</body>
+</html>

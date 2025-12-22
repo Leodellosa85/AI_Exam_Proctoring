@@ -9,5 +9,6 @@ urlpatterns = [
     path('test/', views.test_page),
     path('frame_b64/', views.send_frame_base64, name='send_frame_base64'),
     path("ws-test/", views.ws_test_page, name="ws_test_page"),
+    path("mediapipe/", views.mediapipe_page, name="mediapipe_page"),
 ]
 
