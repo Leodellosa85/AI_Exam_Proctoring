@@ -77,7 +77,7 @@ B. Yaw (Turning Left/Right)
 C. Roll (Tilt)
 - The Setting: 25°.
 - The Research: Affective Computing & Fatigue Detection.
-Your Defense: "Head roll is typically associated with fatigue or drowsiness. A roll greater than 25 degrees indicates the user is likely resting their head or looking at a paper vertically aligned on the desk."
+"Head roll is typically associated with fatigue or drowsiness. A roll greater than 25 degrees indicates the user is likely resting their head or looking at a paper vertically aligned on the desk."
 
 Calibration (Relative Mode):
 - During the start, you ask the student to "Look at the screen comfortably."
