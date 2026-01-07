@@ -1,0 +1,41 @@
+# Ignore the local virtual environment
+.venv
+.venv/
+venv/
+env/
+.env/
+
+# Bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Django local database (optional – keep if you're using volumes)
+# db.sqlite3
+# .DS_Store
+# *.sqlite3
+
+# # Environment config
+.env
+
+# macOS / editor junk
+.DS_Store
+*.swp
+
+# Logs
+*.log
+
+# Editor folders
+.vscode/
+.idea/
+
+# Node stuff (not needed in final image)
+**/node_modules
+
+# Exclude large data/git folders
+.git/
+.gitignore
+.aws/
+
+# Exclude MediaPipe cache or downloads
+.mediapipe/

@@ -396,6 +396,18 @@ function connectWS() {
 }
 
 startBtn.onclick = async () => {
+
+  // Check for Secure Context
+  if (!window.isSecureContext) {
+     alert("Camera access is denied because this site is not using HTTPS. Please use HTTPS or localhost.");
+     return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+     alert("Browser does not support camera access.");
+     return;
+  }
+
   startBtn.disabled = true;
   statusEl.textContent = "Loading Model...";
 
