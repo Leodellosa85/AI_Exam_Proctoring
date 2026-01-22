@@ -120,4 +120,5 @@ def ws_test_page(request):
 
 def mediapipe_page(request):
     # return render(request, "proctor/mediapipe.html")
-    return render(request, "proctor/mediapipev2.html")    
+    # return render(request, "proctor/mediapipev2.html")
+    return render(request, "proctor/mediapipev3.html")    

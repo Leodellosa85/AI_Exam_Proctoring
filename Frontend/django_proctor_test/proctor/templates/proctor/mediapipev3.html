@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Proctoring - Secure Mode</title>
+
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a; color: #e5e7eb;
+      height: 100vh; display: flex; justify-content: center; align-items: center;
+    }
+
+    /* Target for blurring when face is lost */
+    .app.exam-lock .panel > div:not(.status-container), 
+    .app.exam-lock .controls {
+      filter: blur(15px);
+      pointer-events: none;
+    }
+
+    .app {
+      width: 1000px; max-width: 95%;
+      display: grid; grid-template-columns: auto 300px;
+      gap: 20px; align-items: start;
+      transition: filter 0.3s ease;
+    }
+
+    .video-box {
+      position: relative; width: 640px; height: 480px;
+      background: #000; border-radius: 12px;
+      overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    video, canvas {
+      position: absolute; top: 0; left: 0;
+      width: 640px; height: 480px; transform: scaleX(-1);
+    }
+
+    .panel {
+      background: #1e293b; border-radius: 12px;
+      padding: 20px; display: flex; flex-direction: column;
+      gap: 16px; height: 440px;
+    }
+
+    .panel h3 {
+      margin: 0 0 5px 0; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: #94a3b8; border-bottom: 1px solid #334155; padding-bottom: 5px;
+    }
+
+    .metric { display: flex; justify-content: space-between; font-family: monospace; font-size: 15px; }
+    .metric span.value { color: #38bdf8; font-weight: bold; }
+
+    .status {
+      margin-top: auto; padding: 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 700; text-align: center;
+      background: #334155; color: #e2e8f0;
+    }
+
+    .status.ok { background: #065f46; color: #6ee7b7; }
+    .status.warn { background: #7c2d12; color: #fdba74; }
+    .status.err { background: #7f1d1d; color: #fca5a5; }
+
+    .guide-text {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      color: white; font-weight: bold; font-size: 20px; text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9); z-index: 10; display: none;
+      background: rgba(0,0,0,0.6); padding: 20px; border-radius: 10px;
+    }
+
+    .controls { grid-column: 1 / -1; display: flex; gap: 15px; justify-content: center; }
+    button { padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+    #startBtn { background: #3b82f6; color: white; }
+    #endBtn { background: #ef4444; color: white; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <div id="app-root" class="app">
+    <div class="video-box">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div id="guide-text" class="guide-text"></div>
+    </div>
+
+    <div class="panel">
+      <div>
+        <h3>Head Pose</h3>
+        <div class="metric"><span>Yaw</span><span class="value" id="yaw">--</span></div>
+        <div class="metric"><span>Pitch</span><span class="value" id="pitch">--</span></div>
+        <div class="metric"><span>Roll</span><span class="value" id="roll">--</span></div>
+      </div>
+
+      <div>
+        <h3>Security Health</h3>
+        <div class="metric"><span>Total Lost</span><span class="value" id="total-lost">0s</span></div>
+        <div class="metric"><span>Violations</span><span class="value" id="violations">0</span></div>
+        <div class="metric"><span>FPS</span><span class="value" id="fps">0</span></div>
+      </div>
+
+      <div class="status-container">
+        <div id="status" class="status">Ready</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">Start Exam</button>
+      <button id="endBtn" disabled>End Exam</button>
+    </div>
+  </div>
+
+  <script id="proctor-script" type="module" 
+          src="{% static 'js/proctoringv5.js' %}"
+          data-model-path="{% static 'models/face_landmarker.task' %}"
+          data-wasm-path="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+          data-ws-url="ws://127.0.0.1:8002/ws/v1/ws/{sessionId}">
+  </script>
+</body>
+</html>
