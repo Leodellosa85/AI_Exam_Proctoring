@@ -7,8 +7,17 @@ import {
 const scriptTag = document.getElementById("proctor-script");
 const MODEL_PATH = scriptTag?.dataset.modelPath ?? "";
 const WASM_PATH = scriptTag?.dataset.wasmPath ?? "";
-const WS_URL_TEMPLATE =
-  scriptTag?.dataset.wsUrl ?? "ws://127.0.0.1:8002/ws/{sessionId}";
+// Django (logging / violations)
+const WS_LOG_URL = "ws://127.0.0.1:8002/ws/v1/ws/{sessionId}";
+
+// FastAPI (liveness)
+const WS_LIVENESS_URL = "ws://127.0.0.1:8001/ws/{sessionId}";
+// const WS_URL_TEMPLATE =
+//   scriptTag?.dataset.wsUrl ?? "ws://127.0.0.1:8002/ws/{sessionId}";
+
+let wsLog = null;
+let wsLiveness = null;
+
 
 const TARGET_FPS = 8;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
@@ -60,6 +69,10 @@ let stabilityMs = 0;
 let lastViolationTrigger = 0;
 let stats = { violations: 0 };
 let calibrationStartTime = null;
+
+const LIVENESS_WINDOW = 16;
+let livenessBuffer = [];
+let lastPoseForMotion = null;
 
 // ===================== ELEMENTS =====================
 const video = document.getElementById("video");
@@ -178,6 +191,7 @@ function handleMonitoring(faceDetected, results, now) {
     pitch: pose.pitch - basePose.pitch,
     roll: pose.roll - basePose.roll
   };
+  sendLivenessFeatures(relativePose);
 
   const violations = detectViolations(relativePose);
   updateDisplayMetrics(relativePose);
@@ -281,6 +295,9 @@ function handleFacePresent(results, now) {
     pitch: pose.pitch - basePose.pitch,
     roll: pose.roll - basePose.roll
   };
+
+  
+
 
   updateDisplayMetrics(relativePose);
   const violations = detectViolations(relativePose);
@@ -560,7 +577,23 @@ startBtn.onclick = async () => {
 
   video.srcObject = stream;
   sessionId = crypto.randomUUID();
-  ws = new WebSocket(WS_URL_TEMPLATE.replace("{sessionId}", sessionId));
+
+  wsLog = new WebSocket(WS_LOG_URL.replace("{sessionId}", sessionId));
+  wsLiveness = new WebSocket(WS_LIVENESS_URL.replace("{sessionId}", sessionId));  
+//   ws = new WebSocket(WS_URL_TEMPLATE.replace("{sessionId}", sessionId));
+  wsLiveness.onopen = () => console.log("✅ Connected to liveness backend");
+  wsLiveness.onerror = (e) => console.error("❌ WebSocket error", e);
+  wsLiveness.onclose = () => console.warn("⚠ WebSocket closed");
+  wsLiveness.onmessage = (e) => console.log("📩 Backend:", e.data);
+
+  wsLiveness.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  if (data.liveness) {
+    handleLivenessResult(data);
+  }
+};
+
 
   video.onloadedmetadata = () => {
     canvas.width = video.videoWidth;
@@ -584,3 +617,57 @@ endBtn.onclick = () => {
   terminateExam("User ended session");
   ws?.close();
 };
+
+function computeMotion(curr, prev) {
+  if (!prev) return 0;
+
+  const dy = curr.yaw - prev.yaw;
+  const dp = curr.pitch - prev.pitch;
+  const dr = curr.roll - prev.roll;
+
+  return Math.sqrt(dy*dy + dp*dp + dr*dr);
+}
+
+function sendLivenessFeatures(pose) {
+  if (!pose) return;
+  const rawmotion = computeMotion(pose, lastPoseForMotion);
+  lastPoseForMotion = pose;
+
+  const motion = Math.min(rawmotion / 10.0, 3.0);
+
+  const features = [
+    pose.yaw,
+    pose.pitch,
+    pose.roll,
+    motion
+  ];
+
+  livenessBuffer.push(features);
+
+  if (livenessBuffer.length > LIVENESS_WINDOW) {
+    livenessBuffer.shift();
+  }
+
+  if (livenessBuffer.length === LIVENESS_WINDOW) {
+    if (wsLiveness?.readyState === WebSocket.OPEN) {
+    wsLiveness.send(JSON.stringify({
+      type: "liveness_features",
+      features
+    }));
+  }
+  }
+}
+
+function handleLivenessResult(data) {
+  if (data.liveness === "fake") {
+    statusEl.textContent = "⚠ SPOOF DETECTED";
+    statusEl.className = "status err";
+  }
+  else if (data.liveness === "suspicious") {
+    statusEl.textContent = "⚠ LIVENESS UNCERTAIN";
+    statusEl.className = "status warn";
+  }
+  console.log("Liveness result:", data);
+}
+
+// s

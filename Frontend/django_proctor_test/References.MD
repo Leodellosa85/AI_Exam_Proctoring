@@ -97,3 +97,4 @@ https://patents.google.com/patent/US20190327258A1
 
 
 https://www.kaggle.com/datasets/trainingdatapro/web-camera-face-liveness-detection?resource=download
+https://github.com/yakhyo/face-anti-spoofing

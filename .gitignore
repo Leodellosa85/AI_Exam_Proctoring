@@ -32,3 +32,11 @@ Thumbs.db
 **/migrations/__pycache__/
 **/migrations/*.pyo 
 learning_and_development/tailwindcss.exe
+
+# Images
+*.png
+*.jpg
+
+# Sessionlogs
+sessionlogs/
+session_logs

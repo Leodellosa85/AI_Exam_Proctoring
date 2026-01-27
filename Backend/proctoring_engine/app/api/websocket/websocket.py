@@ -1,19 +1,13 @@
-import io
-import time
-from PIL import Image
 from fastapi import WebSocket, WebSocketDisconnect
 from ...core.session_manager import get_session, create_session, save_session_log
 from ...core.logger import log_event
 from ...config.settings import FACE_ABSENCE_TIMEOUT
+from ...core.liveness_engine import LivenessEngine
+import time
 
+liveness_engine = LivenessEngine()
 
 class DirectionWebSocket:
-    """
-    WebSocket handler for:
-    ✔ Face detection
-    ✔ Liveness check (real vs fake)
-    ✔ Normalized bounding boxes for frontend overlay
-    """
 
     def __init__(self, detector=None):
         self.detector = detector
@@ -25,84 +19,88 @@ class DirectionWebSocket:
         if not session:
             session_id, session = create_session()
 
+        liveness_engine.reset_session(session_id)
+
         log_event(session, "ws_connected", {})
+        print("WebSocket connected:", session_id)
+
 
         try:
             while True:
-                # Receive binary image frame
-                frame_bytes = await websocket.receive_bytes()
-                img = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
-                img_width, img_height = img.size
+                data = await websocket.receive_json()
 
-                # ----------------------------------------------------
-                # 1. FACE DETECTION
-                # ----------------------------------------------------
-                if self.detector:
-                    num_faces, boxes = self.detector.detect_faces(img)
-                else:
-                    num_faces, boxes = 0, []
+                if data["type"] == "liveness_features":
+                    features = data["features"]  # [yaw, pitch, roll, motion]
 
-                now = time.time()
+                    score = liveness_engine.add_features(session_id, features)
+                    avg_score = liveness_engine.get_smoothed_score(session_id)
+                    motion = features[3]
 
-                if num_faces == -1:
+                    liveness_status = "unknown"
+
+                    # if score is not None:
+                    #     if score > 0.9:
+                    #         liveness_status = "real"
+                    #         session["flag_spoof"] = False
+                    #     elif score < 0.7:
+                    #         liveness_status = "fake"
+                    #         session["flag_spoof"] = True
+                    #         log_event(session, "spoof_detected", {"score": score})
+                    #     else:
+                    #         liveness_status = "suspicious"
+                    liveness_status = "unknown"
+
+                    if score is not None:
+
+                        # 🧊 Photo detection
+                        if score < 0.70 and motion < 0.03:
+                            liveness_status = "fake"
+                            session["flag_spoof"] = True
+
+                        # 🚨 Hard spoof
+                        elif score < 0.45:
+                            liveness_status = "fake"
+                            session["flag_spoof"] = True
+
+                        # ✅ Stable real
+                        elif avg_score and avg_score > 0.78:
+                            liveness_status = "real"
+                            session["flag_spoof"] = False
+
+                        # 🧠 Natural motion
+                        elif avg_score and avg_score > 0.65 and motion > 0.12:
+                            liveness_status = "real"
+                            session["flag_spoof"] = False
+
+                        else:
+                            liveness_status = "suspicious"
+                            session["flag_spoof"] = False
+
+                    # ---- Cooldown override (PUT HERE) ----
+                    now = time.time()
+
+                    if session.get("last_status") == "real" and liveness_status == "suspicious":
+                        if now - session.get("last_real_time", 0) < 3:
+                            liveness_status = "real"
+
+                    # ---- Save state for next frame ----
+                    session["last_status"] = liveness_status
+                    if liveness_status == "real":
+                        session["last_real_time"] = now
+
                     await websocket.send_json({
-                        "error": "MODEL_NOT_LOADED",
-                        "message": "Face detection model failed."
-                    })
-                    continue
-
-                # No detected faces
-                if num_faces == 0:
-                    if now - session["last_face_seen"] > FACE_ABSENCE_TIMEOUT:
-                        session["terminated"] = True
-                        log_event(session, "terminate_exam", {"reason": "face_absent"})
-                        await websocket.send_json({"terminate": True})
-                        save_session_log(session_id)
-                        break
-                else:
-                    session["last_face_seen"] = now
-
-                # ----------------------------------------------------
-                # 2. LIVENESS CHECK (Real vs Fake face)
-                # ----------------------------------------------------
-                liveness_status = "unknown"
-
-                if num_faces == 1:
-                    # Optional: crop face before liveness
-                    # For now – send full image to model
-                    liveness_status = self.detector.check_liveness(img)
-                    session["flag_spoof"] = (liveness_status != "real")
-                    if session["flag_spoof"]:
-                        log_event(session, "spoof_detected", {"status": liveness_status})
-                else:
-                    session["flag_spoof"] = False
-
-                # ----------------------------------------------------
-                # 3. Normalize boxes for frontend overlay
-                # ----------------------------------------------------
-                boxes_normalized = []
-                for box in boxes:
-                    boxes_normalized.append({
-                        "x": box["x"] / img_width,
-                        "y": box["y"] / img_height,
-                        "width": box["width"] / img_width,
-                        "height": box["height"] / img_height
+                        "liveness": liveness_status,
+                        "score": score,
+                        "flags": {
+                            "spoof": session.get("flag_spoof", False)
+                        },
+                        "terminate": session.get("terminated", False)
                     })
 
-                # ----------------------------------------------------
-                # 4. Send response to client
-                # ----------------------------------------------------
-                await websocket.send_json({
-                    "num_faces": num_faces,
-                    "boxes": boxes_normalized,
-                    "liveness": liveness_status,
-                    "flags": {
-                        "spoof": session.get("flag_spoof", False),
-                    },
-                    "terminate": session["terminated"]
-                })
+                elif data["type"] == "heartbeat":
+                    session["last_face_seen"] = time.time()
 
-                if session["terminated"]:
+                if session.get("terminated"):
                     break
 
         except WebSocketDisconnect:
