@@ -91,7 +91,7 @@ class DirectionWebSocketV2:
                         # else:
                         #     liveness = "fake"
 
-                        if avg_score > 0.915:
+                        if avg_score > 0.90:
                             liveness = "real"      # Your face is consistently 0.92+
                         elif avg_score > 0.85:
                             liveness = "suspicious" # Transition zone

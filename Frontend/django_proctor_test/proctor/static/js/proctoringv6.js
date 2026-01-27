@@ -39,6 +39,11 @@ const TIER = {
   STABILITY: 3000
 };
 
+const SPOOF_POLICY = {
+  SUSPICIOUS_LOCK_MS: 3000,   // lock if suspicious lasts 3s
+  FAKE_TERMINATE_MS: 1500     // terminate if fake lasts 1.5s
+};
+
 // ===================== STATE =====================
 let faceLandmarker, ws, sessionId;
 
@@ -78,6 +83,10 @@ const SPOOF_SEND_INTERVAL = 10;   // every 10 frames (~1.25s @ 8fps)
 const CROP_SCALE = 1.6;
 // const CROP_SCALE = 2.7;
 let spoofFrameCounter = 0;
+
+let spoofStatus = "real";
+let spoofSince = null;
+
 
 
 // ===================== ELEMENTS =====================
@@ -139,13 +148,6 @@ function processFrames() {
     results?.facialTransformationMatrixes?.length &&
     results?.faceLandmarks?.length;
 
-//   if (faceDetected) {
-//     missingSince = null;
-//     handleFacePresent(results, now);
-//   } else {
-//     if (!missingSince) missingSince = now;
-//     handleFaceMissing(now);
-//   }
   switch (currentMode) {
     case MODE.CALIBRATION:
       handleCalibration(faceDetected, results, now);
@@ -218,13 +220,12 @@ function handleFaceMissing(now) {
   if (!missingSince) missingSince = now;
 
   const missingMs = now - missingSince;
-  totalMissingMs += FRAME_INTERVAL;
+  addCumulativeMissingTime();
   stabilityMs = 0;
 
   yawEl.textContent = "--";
   pitchEl.textContent = "--";
   rollEl.textContent = "--";
-  totalLostEl.textContent = `${Math.floor(totalMissingMs / 1000)}s`;
 
   statusEl.textContent = "sFACE MISSING";
   statusEl.className = "status warn";
@@ -251,10 +252,12 @@ function handleLocked(faceDetected, results, now) {
 
   if (!faceDetected) {
     stabilityMs = 0;
+    addCumulativeMissingTime();
     return;
   }
 
   stabilityMs += FRAME_INTERVAL;
+  addCumulativeMissingTime();
   const remaining = Math.max(0, TIER.STABILITY - stabilityMs);
 
   guideTextEl.style.display = "block";
@@ -357,36 +360,6 @@ function terminateExam(reason) {
 
   video.srcObject?.getTracks().forEach(t => t.stop());
 }
-// ===================== STATE HELPERS =====================
-// function lockSession() {
-//   isLocked = true;
-//   stabilityMs = 0;
-//   appRoot.classList.add("exam-lock");
-//   guideTextEl.style.display = "block";
-//   guideTextEl.textContent = "FACE LOST\nEXAM BLURRED";
-// }
-
-// function unlockSession() {
-//   isLocked = false;
-//   stabilityMs = 0;
-//   guideTextEl.style.display = "none";
-//   appRoot.classList.remove("exam-lock");
-
-//   statusEl.textContent = "✓ SECURE";
-//   statusEl.className = "status ok";
-// }
-
-// function terminateExam(reason) {
-//   isTerminated = true;
-//   statusEl.textContent = "❌ TERMINATED";
-//   statusEl.className = "status err";
-
-//   guideTextEl.style.display = "block";
-//   guideTextEl.innerHTML = `EXAM ENDED<br><small>${reason}</small>`;
-//   appRoot.classList.add("exam-lock");
-
-//   video.srcObject?.getTracks().forEach(t => t.stop());
-// }
 
 // ===================== CALIBRATION =====================
 function runCalibration(now, pose, box) {
@@ -540,6 +513,15 @@ function captureViolationImage(video, box) {
   return captureCanvas.toDataURL("image/jpeg", 0.5);
 }
 
+function addCumulativeMissingTime() {
+  totalMissingMs += FRAME_INTERVAL;
+  totalLostEl.textContent = `${Math.floor(totalMissingMs / 1000)}s`;
+
+  if (totalMissingMs >= TIER.CUMULATIVE) {
+    terminateExam("Total off-screen / locked time exceeded");
+  }
+}
+
 
 function syncMonitoringData(relativePose, violations, box) {
   const now = performance.now(); // Use performance.now for consistency
@@ -572,11 +554,6 @@ function syncMonitoringData(relativePose, violations, box) {
       }
     }
   }
-
-  // 3. Send to WebSocket (Metadata sent every frame, image only when captured)
-//   if (ws?.readyState === WebSocket.OPEN) {
-//     ws.send(JSON.stringify(payload));
-//   }
 }
 
 
@@ -678,57 +655,59 @@ function sendLivenessFeatures(pose) {
   }
 }
 
+
 function handleLivenessResult(data) {
-  if (data.liveness === "fake") {
-    statusEl.textContent = "⚠ SPOOF DETECTED";
-    statusEl.className = "status err";
-  }
-  else if (data.liveness === "suspicious") {
-    statusEl.textContent = "⚠ LIVENESS UNCERTAIN";
-    statusEl.className = "status warn";
-  }
+  if (!data || !data.liveness) return;
   console.log("Liveness result:", data);
+
+  const now = performance.now();
+  const newStatus = data.liveness;
+
+  // Reset timer if status changed
+  if (newStatus !== spoofStatus) {
+    spoofStatus = newStatus;
+    spoofSince = now;
+  }
+
+  const duration = spoofSince ? now - spoofSince : 0;
+
+  // ---------------- UI feedback ----------------
+  if (newStatus === "real") {
+    // Only clear spoof UI if not terminated
+    if (currentMode !== MODE.TERMINATED) {
+      statusEl.textContent = "✓ LIVENESS OK";
+      statusEl.className = "status ok";
+    }
+    return;
+  }
+
+  if (newStatus === "suspicious") {
+    // statusEl.textContent = "⚠ LIVENESS SUSPICIOUS";
+    // statusEl.className = "status warn";
+
+    // // Lock if sustained
+    // if (duration >= SPOOF_POLICY.SUSPICIOUS_LOCK_MS &&
+    //     currentMode === MODE.MONITORING) {
+    //   lockSession();
+    // }
+    // return;
+  }
+
+  if (newStatus === "fake") {
+    // statusEl.textContent = "⛔ SPOOF DETECTED";
+    // statusEl.className = "status err";
+
+    // // Immediate cumulative counting
+    // addCumulativeMissingTime();
+
+    // if (duration >= SPOOF_POLICY.FAKE_TERMINATE_MS &&
+    //     currentMode !== MODE.TERMINATED) {
+    //   terminateExam("Spoofing / Fake face detected");
+    // }
+  }
 }
 
-// function cropFaceScaled(video, box, scale = 2.7) {
-//   if (!box) return null;
 
-//   const vw = video.videoWidth;
-//   const vh = video.videoHeight;
-
-//   const cx = box.x + box.w / 2;
-//   const cy = box.y + box.h / 2;
-
-// //   const size = Math.max(box.w, box.h) * scale;
-//   const size = Math.min(
-//     Math.max(box.w, box.h) * scale,
-//     Math.min(vw, vh)
-//     );
-
-
-//   let x = Math.round(cx - size / 2);
-//   let y = Math.round(cy - size / 2);
-//   let w = Math.round(size);
-//   let h = Math.round(size);
-
-//   // Clamp to frame
-//   x = Math.max(0, x);
-//   y = Math.max(0, y);
-
-//   if (x + w > vw) w = vw - x;
-//   if (y + h > vh) h = vh - y;
-
-//   if (w < 20 || h < 20) return null;
-
-//   const c = document.createElement("canvas");
-//   c.width = w;
-//   c.height = h;
-
-//   const ctx = c.getContext("2d");
-//   ctx.drawImage(video, x, y, w, h, 0, 0, w, h);
-
-//   return c.toDataURL("image/jpeg", 0.9);
-// }
 
 function cropFaceScaled(video, box, scale = CROP_SCALE) {
   if (!box) return null;
