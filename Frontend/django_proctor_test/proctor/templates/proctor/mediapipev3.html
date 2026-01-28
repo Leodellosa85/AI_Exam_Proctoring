@@ -76,6 +76,12 @@
     #startBtn { background: #3b82f6; color: white; }
     #endBtn { background: #ef4444; color: white; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #toggleLivenessBtn {
+      background: #22c55e;
+      color: #022c22;
+    }
+
   </style>
 </head>
 <body>
@@ -100,6 +106,9 @@
         <div class="metric"><span>Total Lost</span><span class="value" id="total-lost">0s</span></div>
         <div class="metric"><span>Violations</span><span class="value" id="violations">0</span></div>
         <div class="metric"><span>FPS</span><span class="value" id="fps">0</span></div>
+
+        <div class="metric"><span>Spoof Score</span><span class="value" id="spoof-score">--</span></div>
+        <div class="metric"><span>Liveness</span><span class="value" id="liveness-status">--</span></div>
       </div>
 
       <div class="status-container">
@@ -110,6 +119,7 @@
     <div class="controls">
       <button id="startBtn">Start Exam</button>
       <button id="endBtn" disabled>End Exam</button>
+      <button id="toggleLivenessBtn">Liveness: ON</button>
     </div>
   </div>
 

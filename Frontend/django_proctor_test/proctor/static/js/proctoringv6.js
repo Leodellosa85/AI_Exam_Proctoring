@@ -26,7 +26,9 @@ const ANGLE_LIMITS = {
   PITCH_DOWN: 15,
   PITCH_UP: -25,
   YAW_LEFT: 30,
-  YAW_RIGHT: -30
+  YAW_RIGHT: -30,
+  ROLL_LEFT: 25,      
+  ROLL_RIGHT: -25    
 };
 
 const SAFE_ZONE = { xMin: 0.2, xMax: 0.8, yMin: 0.1, yMax: 0.9 };
@@ -87,6 +89,9 @@ let spoofFrameCounter = 0;
 let spoofStatus = "real";
 let spoofSince = null;
 
+let useBackendLiveness = true;   // toggle flag
+
+
 
 
 // ===================== ELEMENTS =====================
@@ -107,6 +112,12 @@ const fpsEl = document.getElementById("fps");
 
 const startBtn = document.getElementById("startBtn");
 const endBtn = document.getElementById("endBtn");
+
+const toggleLivenessBtn = document.getElementById("toggleLivenessBtn");
+const spoofScoreEl = document.getElementById("spoof-score");
+const livenessStatusEl = document.getElementById("liveness-status");
+
+
 
 // ===================== INIT =====================
 async function initMediaPipe() {
@@ -207,9 +218,9 @@ function handleMonitoring(faceDetected, results, now) {
     pitch: pose.pitch - basePose.pitch,
     roll: pose.roll - basePose.roll
   };
-//   sendLivenessFeatures(relativePose);
 
-  const violations = detectViolations(relativePose);
+  const violations = detectViolations(relativePose, box);
+
   updateDisplayMetrics(relativePose);
   drawBoundingBox(box, violations.length > 0);
 
@@ -267,71 +278,6 @@ function handleLocked(faceDetected, results, now) {
     unlockSession();
   }
 }
-
-
-// ===================== FACE PRESENT =====================
-function handleFacePresent(results, now) {
-  const landmarks = results.faceLandmarks[0];
-  const matrix = Array.from(
-    results.facialTransformationMatrixes[0].data
-  );
-
-  const pose = calculateHeadPose(matrix);
-  const box = getBoundingBox(landmarks);
-
-  // -------- LOCKED STATE --------
-  if (isLocked) {
-    stabilityMs += FRAME_INTERVAL;
-    const remaining = Math.max(0, TIER.STABILITY - stabilityMs);
-
-    statusEl.textContent = `⚠ STABILIZING... ${(remaining / 1000).toFixed(1)}s`;
-    statusEl.className = "status warn";
-
-    guideTextEl.style.display = "block";
-    guideTextEl.textContent = "HOLD STILL TO UNLOCK";
-    appRoot.classList.add("exam-lock");
-
-    drawBoundingBox(box, false);
-
-    if (stabilityMs >= TIER.STABILITY) unlockSession();
-    return;
-  }
-
-  // -------- CALIBRATION --------
-  if (isCalibrating) {
-    runCalibration(now, pose, box);
-    drawBoundingBox(box, false);
-    return;
-  }
-
-  // -------- NORMAL MONITORING --------
-  stabilityMs = 0;
-
-  const relativePose = {
-    yaw: pose.yaw - basePose.yaw,
-    pitch: pose.pitch - basePose.pitch,
-    roll: pose.roll - basePose.roll
-  };
-
-  
-
-
-  updateDisplayMetrics(relativePose);
-  const violations = detectViolations(relativePose);
-
-  if (violations.length) {
-    statusEl.textContent = violations[0];
-    statusEl.className = "status warn";
-    drawBoundingBox(box, true);
-  } else {
-    statusEl.textContent = "✓ SECURE";
-    statusEl.className = "status ok";
-    drawBoundingBox(box, false);
-  }
-
-  syncMonitoringData(relativePose, violations, box);
-}
-
 
 function lockSession() {
   currentMode = MODE.LOCKED;
@@ -446,12 +392,25 @@ function getBoundingBox(landmarks) {
   };
 }
 
-function detectViolations(p) {
+function detectViolations(p,box) {
   const v = [];
   if (p.pitch > ANGLE_LIMITS.PITCH_DOWN) v.push("Looking Down");
   if (p.pitch < ANGLE_LIMITS.PITCH_UP) v.push("Looking Up");
   if (p.yaw > ANGLE_LIMITS.YAW_LEFT) v.push("Looking Left");
   if (p.yaw < ANGLE_LIMITS.YAW_RIGHT) v.push("Looking Right");
+  if (p.roll > ANGLE_LIMITS.ROLL_LEFT)   v.push("Head tilted Left");
+  if (p.roll < ANGLE_LIMITS.ROLL_RIGHT)  v.push("Head tilted Right");
+
+  if (box) {
+    const faceCX = (box.x + box.w / 2) / canvas.width;
+    const faceCY = (box.y + box.h / 2) / canvas.height;
+
+    if (faceCX < SAFE_ZONE.xMin) v.push("Too far Right");
+    if (faceCX > SAFE_ZONE.xMax) v.push("Too far Left");
+    if (faceCY < SAFE_ZONE.yMin) v.push("Too High");
+    if (faceCY > SAFE_ZONE.yMax) v.push("Too Low");
+  }
+
   return v;
 }
 
@@ -539,8 +498,8 @@ function syncMonitoringData(relativePose, violations, box) {
       violationsEl.textContent = stats.violations; // Update UI counter
 
       payload.image = captureViolationImage(video, box);
-      if (ws?.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(payload));
+      if (wsLog?.readyState === WebSocket.OPEN) {
+        wsLog.send(JSON.stringify(payload));
       }
     }
   } else {
@@ -549,8 +508,8 @@ function syncMonitoringData(relativePose, violations, box) {
      if (now - lastViolationLogTime >= 1000) {
       lastViolationLogTime = now;
 
-      if (ws?.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(payload));
+      if (wsLog?.readyState === WebSocket.OPEN) {
+        wsLog.send(JSON.stringify(payload));
       }
     }
   }
@@ -615,50 +574,22 @@ endBtn.onclick = () => {
   ws?.close();
 };
 
-function computeMotion(curr, prev) {
-  if (!prev) return 0;
-
-  const dy = curr.yaw - prev.yaw;
-  const dp = curr.pitch - prev.pitch;
-  const dr = curr.roll - prev.roll;
-
-  return Math.sqrt(dy*dy + dp*dp + dr*dr);
-}
-
-function sendLivenessFeatures(pose) {
-  if (!pose) return;
-  const rawmotion = computeMotion(pose, lastPoseForMotion);
-  lastPoseForMotion = pose;
-
-  const motion = Math.min(rawmotion / 10.0, 3.0);
-
-  const features = [
-    pose.yaw,
-    pose.pitch,
-    pose.roll,
-    motion
-  ];
-
-  livenessBuffer.push(features);
-
-  if (livenessBuffer.length > LIVENESS_WINDOW) {
-    livenessBuffer.shift();
-  }
-
-  if (livenessBuffer.length === LIVENESS_WINDOW) {
-    if (wsLiveness?.readyState === WebSocket.OPEN) {
-    wsLiveness.send(JSON.stringify({
-      type: "liveness_features",
-      features
-    }));
-  }
-  }
-}
-
 
 function handleLivenessResult(data) {
   if (!data || !data.liveness) return;
   console.log("Liveness result:", data);
+
+   // ---- Always show score ----
+  if (typeof data.spoof_score === "number") {
+    spoofScoreEl.textContent = data.spoof_score.toFixed(3);
+  }
+
+  livenessStatusEl.textContent = data.liveness.toUpperCase();
+
+  if (!useBackendLiveness) {
+    return; // UI only, no lock, no terminate, no punishment
+  }
+
 
   const now = performance.now();
   const newStatus = data.liveness;
@@ -671,39 +602,24 @@ function handleLivenessResult(data) {
 
   const duration = spoofSince ? now - spoofSince : 0;
 
-  // ---------------- UI feedback ----------------
-  if (newStatus === "real") {
-    // Only clear spoof UI if not terminated
-    if (currentMode !== MODE.TERMINATED) {
-      statusEl.textContent = "✓ LIVENESS OK";
-      statusEl.className = "status ok";
+
+  if (newStatus === "suspicious") {
+    // Lock if sustained
+    if (duration >= SPOOF_POLICY.SUSPICIOUS_LOCK_MS &&
+        currentMode === MODE.MONITORING) {
+      lockSession();
     }
     return;
   }
 
-  if (newStatus === "suspicious") {
-    // statusEl.textContent = "⚠ LIVENESS SUSPICIOUS";
-    // statusEl.className = "status warn";
-
-    // // Lock if sustained
-    // if (duration >= SPOOF_POLICY.SUSPICIOUS_LOCK_MS &&
-    //     currentMode === MODE.MONITORING) {
-    //   lockSession();
-    // }
-    // return;
-  }
-
   if (newStatus === "fake") {
-    // statusEl.textContent = "⛔ SPOOF DETECTED";
-    // statusEl.className = "status err";
+    // Immediate cumulative counting
+    addCumulativeMissingTime();
 
-    // // Immediate cumulative counting
-    // addCumulativeMissingTime();
-
-    // if (duration >= SPOOF_POLICY.FAKE_TERMINATE_MS &&
-    //     currentMode !== MODE.TERMINATED) {
-    //   terminateExam("Spoofing / Fake face detected");
-    // }
+    if (duration >= SPOOF_POLICY.FAKE_TERMINATE_MS &&
+        currentMode !== MODE.TERMINATED) {
+      terminateExam("Spoofing / Fake face detected");
+    }
   }
 }
 
@@ -734,20 +650,38 @@ function cropFaceScaled(video, box, scale = CROP_SCALE) {
   ctx.drawImage(video, x, y, size, size, 0, 0, 120, 120);
 
   // Use 0.8 quality to keep the file small but keep texture details
-  return c.toDataURL("image/jpeg", 0.8);
+//   return c.toDataURL("image/jpeg", 0.8);
+  return new Promise(resolve => {
+    c.toBlob(blob => resolve(blob), "image/jpeg", 0.9);
+  });
 }
 
 
-function sendFaceCrop(box) {
+async function sendFaceCrop(box) {
   if (!wsLiveness || wsLiveness.readyState !== WebSocket.OPEN) return;
 
-  const img64 = cropFaceScaled(video, box, CROP_SCALE);
-  if (!img64) return;
+  const blob = await cropFaceScaled(video, box, CROP_SCALE);
+  if (!blob) return;
 
   wsLiveness.send(JSON.stringify({
     type: "face_crop",
-    image: img64
+    encoding: "binary",
+    mime: "image/jpeg",
+    size: blob.size
   }));
+
+  const buffer = await blob.arrayBuffer();
+  wsLiveness.send(buffer);
 }
 
+
+toggleLivenessBtn.onclick = () => {
+  useBackendLiveness = !useBackendLiveness;
+
+  toggleLivenessBtn.textContent =
+    `Liveness: ${useBackendLiveness ? "ON" : "OFF"}`;
+
+  toggleLivenessBtn.style.background =
+    useBackendLiveness ? "#22c55e" : "#6b7280";
+};
 
