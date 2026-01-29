@@ -1,0 +1,21 @@
+
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: capstone-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./Backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./Frontend
+    container_name: capstone-frontend
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

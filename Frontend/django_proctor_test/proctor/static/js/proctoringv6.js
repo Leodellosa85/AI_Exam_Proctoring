@@ -10,10 +10,10 @@ const WASM_PATH = scriptTag?.dataset.wasmPath ?? "";
 // Django (logging / violations)
 const WS_LOG_URL = "ws://127.0.0.1:8002/ws/v1/ws/{sessionId}";
 
-// FastAPI (liveness)
+// FastAPI (liveness)ws://backend:8001/ws2/{sessionId}
 const WS_LIVENESS_URL = "ws://127.0.0.1:8001/ws2/{sessionId}";
-// const WS_URL_TEMPLATE =
-//   scriptTag?.dataset.wsUrl ?? "ws://127.0.0.1:8002/ws/{sessionId}";
+// const WS_LIVENESS_URL = "ws://backend:8001/ws2/{sessionId}";
+
 
 let wsLog = null;
 let wsLiveness = null;
@@ -37,7 +37,7 @@ const TIER = {
   FLAG: 3000,
   BLUR: 5000,
   TERMINATE: 15000,
-  CUMULATIVE: 60000,
+  CUMULATIVE: 30000,
   STABILITY: 3000
 };
 
@@ -82,7 +82,7 @@ let livenessBuffer = [];
 let lastPoseForMotion = null;
 
 const SPOOF_SEND_INTERVAL = 10;   // every 10 frames (~1.25s @ 8fps)
-const CROP_SCALE = 1.6;
+const CROP_SCALE = 1.2;
 // const CROP_SCALE = 2.7;
 let spoofFrameCounter = 0;
 
@@ -228,11 +228,14 @@ function handleMonitoring(faceDetected, results, now) {
 }
 
 function handleFaceMissing(now) {
-  if (!missingSince) missingSince = now;
+  if (!missingSince) {
+    missingSince = now;
+    // Optional: Reset violation trigger so the first log happens exactly at 3s
+    lastViolationTrigger = 0; 
+  }
 
   const missingMs = now - missingSince;
   addCumulativeMissingTime();
-  stabilityMs = 0;
 
   yawEl.textContent = "--";
   pitchEl.textContent = "--";
@@ -240,21 +243,29 @@ function handleFaceMissing(now) {
 
   statusEl.textContent = "sFACE MISSING";
   statusEl.className = "status warn";
+
+  
   drawBoundingBox(null, false);
+  if (missingMs < TIER.FLAG) {
+    statusEl.textContent = "FACE LOST - PLEASE RETURN";
+    statusEl.className = "status warn";
+  }
+  else {
+    statusEl.textContent = "VIOLATION: FACE MISSING";
+    statusEl.className = "status err";
+    
+    // This logs the "Face Missing" violation and empty-chair snapshot every 1s
+    syncMonitoringData(null, ["Face Missing"], null);
+  }
 
   if (missingMs >= TIER.BLUR) {
     lockSession();
-  }
-
-  if (missingMs >= TIER.TERMINATE) {
-    terminateExam("Face missing too long");
   }
 
   if (totalMissingMs >= TIER.CUMULATIVE) {
     terminateExam("Total off-screen time exceeded");
   }
 
-  syncMonitoringData(null, ["Face Missing"], null);
 }
 
 function handleLocked(faceDetected, results, now) {
@@ -263,12 +274,17 @@ function handleLocked(faceDetected, results, now) {
 
   if (!faceDetected) {
     stabilityMs = 0;
+    const missingMs = now - missingSince;
     addCumulativeMissingTime();
+    if (missingMs >= TIER.TERMINATE) {
+      terminateExam("Face missing too long (Abandoned)");
+      return;
+    }
     return;
   }
 
   stabilityMs += FRAME_INTERVAL;
-  addCumulativeMissingTime();
+//   addCumulativeMissingTime();
   const remaining = Math.max(0, TIER.STABILITY - stabilityMs);
 
   guideTextEl.style.display = "block";
@@ -304,7 +320,13 @@ function terminateExam(reason) {
   guideTextEl.innerHTML = `EXAM ENDED<br><small>${reason}</small>`;
   appRoot.classList.add("exam-lock");
 
-  video.srcObject?.getTracks().forEach(t => t.stop());
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
+  }
+
+  wsLog?.close();
+  wsLiveness?.close();
 }
 
 // ===================== CALIBRATION =====================
@@ -627,6 +649,14 @@ function handleLivenessResult(data) {
 
 function cropFaceScaled(video, box, scale = CROP_SCALE) {
   if (!box) return null;
+
+  // Reject tiny faces (prevents blurry upscaling → false fake)
+  if (box.w < 60 || box.h < 60) {
+    statusEl.textContent = "Move closer to the camera";
+    statusEl.className = "status warn";
+    console.warn("Face too small for reliable liveness:", box.w, box.h);
+    return null;
+  }
 
   const vw = video.videoWidth;
   const vh = video.videoHeight;
