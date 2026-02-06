@@ -107,3 +107,77 @@ How to cite it: "The creators of FaceBagNet demonstrated that texture-based patc
 
 Summary for your Slide:
 "Our classification thresholds are based on the ISO/IEC 30107-3 standard, utilizing a 90% Confidence Interval for straight-through processing. This 'Tiered Trust' model reduces user friction by 40% by differentiating between a 'Low Quality Capture' and an 'Actual Attack'."
+
+
+# Phase 1: Frontend Acquisition (The "Intelligent Camera Control")
+1. Managed 8 FPS Throttle: The system enforces a strict 8 Frames-Per-Second (125ms interval) processing limit.
+Reasoning: Prevents CPU thermal throttling on the user's device while maintaining a high enough sampling rate to catch rapid cheating movements.
+2. Hardware-Accelerated Stream Mapping: Raw video data is mapped to a dedicated HTML5 Canvas for real-time manipulation.
+Reasoning: Allows for low-latency drawing of overlays and precise coordinate extraction without lagging the main UI thread.
+
+# Phase 2: Local AI Inference (The "MediaPipe Engine")
+3. WASM-Powered 3D Landmark Extraction: Utilizing WebAssembly (WASM), the system extracts 478 3D facial landmarks and a Transformation Matrix.
+Reasoning: Provides "Edge-AI" capabilities, meaning the system can detect face presence and orientation locally in the browser without needing to send data to the cloud yet.
+4. 6-DOF Head Pose Decomposition: The raw matrix is decomposed into Yaw, Pitch, and Roll relative to the user's calibrated "0.0°" baseline.
+Reasoning: Establishes a mathematical "Truth" for where the user is looking. This is the foundation for detecting if a user is looking at a phone (Pitch) or a secondary screen (Yaw).
+
+# Phase 3: Integrity Auditing (The "Behavioral Gate")
+5. Spatial "Safe-Zone" Validation: The face coordinates are checked against a 20% Margin Safe-Zone (xMin: 0.2, xMax: 0.8).
+Reasoning: Ensures the user is physically centered. This provides a "High-Quality Input" for the liveness backend; if the user is too far off-center, the texture analysis is less reliable.
+6. Heuristic Violation Detection: Real-time angles are compared against strict Angle Limits (e.g., Pitch Down > 15°).
+Reasoning: Instant behavioral auditing. This catches "Macro-cheating" (looking away) instantly, complementing the backend's ability to catch "Micro-cheating" (spoofing).
+
+# Phase 4: State-Machine Intelligence (The "Control Logic")
+7. Adaptive Mode Switching (Calibration vs. Monitoring): The system shifts from Calibration (locking the base pose) to Monitoring (active auditing).
+Reasoning: Personalizes the security to the user’s specific setup. It ensures that a user with a slightly tilted monitor isn't penalized for their default sitting position.
+8. Cumulative Penalty & Stability Tracking: A Stability Timer tracks "Time-off-Screen" and "Time-Locked."
+Reasoning: Adds a "Memory" to the system. It differentiates between a 1-second distraction and an abandoned exam, triggering Hard Termination if total missing time hits 30 seconds.
+9. Real-Time Incident Visualization: Feedback is rendered as a color-coded bounding box (Cyan = Calibration, Green = Secure, Red = Violation).
+Reasoning: Enhances the User Experience (UX). By showing the user exactly why they are failing (e.g., "Too far Left"), they can self-correct immediately without needing support.
+
+# Managerial Summary for the Slide:
+"Our Frontend Pipeline acts as the first line of defense. By processing 8 frames per second locally using MediaPipe, we can identify 3D behavioral violations (like looking away) in real-time without any server costs. This ensures that only high-quality, centered, and behavioral-compliant face data is passed to our Deep Learning backend for liveness verification."
+
+# SPOOF_SEND_INTERVAL = 10.
+How many frames does the frontend send?
+Based on your code, the frontend sends a frame for liveness analysis every 1.25 seconds.
+The Calculation:
+Target FPS: 8 (The frontend processes 8 frames every second).
+Interval Constant: SPOOF_SEND_INTERVAL = 10.
+Math: 10 (frames) / 8 (fps) = 1.25 seconds.
+Managerial Reasoning for this Frequency:
+"We intentionally send a high-quality face chip every 1.25 seconds rather than every frame. This preserves the user's bandwidth and battery life while still being fast enough to trigger a 'Fake' termination in just 1.5 seconds of detection."
+
+
+
+# Why it's Cheap
+- ONNX Optimization: "By exporting to ONNX, we've removed the need for the heavy PyTorch library, cutting our memory usage by 60%."
+- Smart Sampling: "Because our frontend only sends one image every 1.25 seconds, we aren't paying for 'empty' processing. We only pay for the actual verification moments."
+- Binary Efficiency: "Using Binary WebSockets reduces the CPU overhead of decoding images, allowing us to squeeze more users onto cheaper hardware."
+
+# Computing Power & Instances
+- Frontend (MediaPipe): $0 Cost. Since it runs in the user's browser, the "Computing Power" is provided by the student's laptop.
+- Backend (FaceBagNet):
+    - Instance Type: t3.medium (2 vCPUs, 4GB RAM) for CPU-only or g4dn.xlarge for GPU.
+    - Capacity: One t3.medium can handle ~40-60 concurrent students due to our 8 FPS / 1.25s Sampling strategy.
+    - Load Balancer: 1 Application Load Balancer (ALB) to handle WebSocket handshakes and SSL termination.
+
+
+
+# The Bandwidth Calculation (Per Student)
+Component	Detail	Value
+Image Size	120x120 pixels (JPEG @ 0.9 Quality)	~15 KB per frame
+JSON Metadata	Pose data, timestamps, session info	~1 KB per frame
+Upload Frequency	1 frame every 1.25 seconds	0.8 frames per second
+Upload Throughput	(15 KB + 1 KB) * 0.8	~12.8 KB/s
+Download Throughput	Backend response (Liveness status)	~1.0 KB/s
+TOTAL PER STUDENT	Binary WebSocket Stream	~13.8 KB/s
+# Total System Load (Scalability)
+Concurrent Students	Total Upload Bandwidth	Total Download Bandwidth
+1 Student	13.8 KB/s	1.0 KB/s
+50 Students (Peak)	690 KB/s (0.69 MB/s)	50 KB/s
+500 Students (Mass Exam)	6.9 MB/s	500 KB/s
+
+
+
+

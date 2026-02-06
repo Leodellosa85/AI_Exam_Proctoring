@@ -129,9 +129,9 @@ class DirectionWebSocketV2:
                             avg_score = sum(session["spoof_history"]) / len(session["spoof_history"])
 
                             # --- Final Decision Logic ---
-                            if avg_score > 0.90:
+                            if avg_score >= 0.90:
                                 liveness = "real"
-                            elif avg_score > 0.85:
+                            elif avg_score >= 0.85:
                                 liveness = "suspicious"
                             else:
                                 liveness = "fake"
