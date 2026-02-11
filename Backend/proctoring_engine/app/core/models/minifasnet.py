@@ -3,17 +3,19 @@ import cv2
 import numpy as np
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # app/
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+
+# minifasnet.py lives in: app/core/models/
+CORE_DIR = os.path.dirname(__file__)            # app/core/models
+APP_DIR = os.path.dirname(os.path.dirname(CORE_DIR))  # app
+MODELS_DIR = os.path.join(APP_DIR, "models")    # app/models
+
 
 MODEL_PATH_V2 = os.path.join(MODELS_DIR, "MiniFASNetV2.onnx")
-MODEL_PATH_V1SE = os.path.join(MODELS_DIR, "MiniFASNetV1SE.onnx")
 
-class SpoofDetector:
-    def __init__(self, model_path_v2=MODEL_PATH_V2, model_path_v1se=MODEL_PATH_V1SE):
+class MiniFASNetDetector:
+    def __init__(self, model_path_v2=MODEL_PATH_V2):
         self.session_v2 = ort.InferenceSession(model_path_v2, providers=["CPUExecutionProvider"])
-        self.session_v1se = ort.InferenceSession(model_path_v1se, providers=["CPUExecutionProvider"])
-        print("✅ Dual-Architecture Calibrated for Production")
+        print("MiniFASNetV2 loaded")
 
     def _preprocess(self, blob):
         # 1. Decode
@@ -59,20 +61,14 @@ class SpoofDetector:
         real_norm = real_prob / denom
         return float(real_norm)
 
-    def predict(self, blob_v2, blob_v1se):
+    def predict(self, blob_v2):
         in_v2 = self._preprocess(blob_v2)
-        in_v1se = self._preprocess(blob_v1se)
         
-        if in_v2 is None or in_v1se is None: return None
+        if in_v2 is None: return None
 
         real_v2 = self._get_score(self.session_v2, in_v2)
-        real_v1se = self._get_score(self.session_v1se, in_v1se)
 
-        print(f"Debug: V2_Real={real_v2:.4f}, V1SE_Real={real_v1se:.4f}")
-        
-        final_real = 0.7 * real_v2 + 0.3 * real_v1se
-
-            
-        spoof_score = 1.0 - final_real
-        print(f"Debug: Combined_Spoof_Score={spoof_score:.4f}")
+        print(f"Debug: V2_Real={real_v2:.4f}")
+        spoof_score = 1.0 - real_v2
+        print(f"Debug: V2_Spoof_Score={spoof_score:.4f}")
         return spoof_score

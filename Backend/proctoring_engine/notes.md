@@ -179,5 +179,7 @@ Concurrent Students	Total Upload Bandwidth	Total Download Bandwidth
 500 Students (Mass Exam)	6.9 MB/s	500 KB/s
 
 
+MiniFASNet is trained mainly for replay / texture / motion
 
+It is weak on static printed photos on webcams
 

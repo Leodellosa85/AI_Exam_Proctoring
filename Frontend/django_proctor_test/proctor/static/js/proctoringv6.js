@@ -81,10 +81,26 @@ const LIVENESS_WINDOW = 16;
 let livenessBuffer = [];
 let lastPoseForMotion = null;
 
-const SPOOF_SEND_INTERVAL = 10;   // every 10 frames (~1.25s @ 8fps)
-const CROP_SCALE = 1.2;
-// const CROP_SCALE = 2.7;
 let spoofFrameCounter = 0;
+const SPOOF_SEND_INTERVAL = 10;   // every 10 frames (~1.25s @ 8fps)
+// const CROP_SCALE = 1.2;
+// const CROP_SCALE = 2.7;
+// Scale constants defined by the MiniFASNet research
+const TARGET_SIZE = 80;
+const SCALE_V2 = 2.7;
+const SCALE_V1SE = 4.0;
+
+// ===================== LIVENESS CROP CONFIG =====================
+const MINI_INPUT_SIZE = 80;      // MiniFASNet ONNX expects 80x80
+const FACEBAG_INPUT_SIZE = 96;   // FaceBagNet usually expects 96x96
+
+// Upper bounds from repo (NOT fixed)
+const MAX_SCALE_V2 = 2.7;
+const MAX_SCALE_V1SE = 4.0;
+const MAX_SCALE_FACEBAG = 2.2;
+
+// Lower bounds for webcams
+const MIN_SCALE = 1.3;
 
 let spoofStatus = "real";
 let spoofSince = null;
@@ -645,63 +661,102 @@ function handleLivenessResult(data) {
   }
 }
 
+function adaptiveScale(boxW, maxScale) {
+  // Webcam faces are usually small → reduce scale
+  console.log("Adaptive scale for box width:", boxW);
+  if (boxW > 220) return maxScale;
+  if (boxW > 160) return Math.min(maxScale, 2.0);
+  if (boxW > 120) return Math.min(maxScale, 1.6);
+  return MIN_SCALE;
+}
 
-
-function cropFaceScaled(video, box, scale = CROP_SCALE) {
-  if (!box) return null;
-
-  // Reject tiny faces (prevents blurry upscaling → false fake)
-  if (box.w < 60 || box.h < 60) {
-    statusEl.textContent = "Move closer to the camera";
-    statusEl.className = "status warn";
-    console.warn("Face too small for reliable liveness:", box.w, box.h);
-    return null;
-  }
-
+function cropFace(video, box, targetSize, scale) {
   const vw = video.videoWidth;
   const vh = video.videoHeight;
 
   const cx = box.x + box.w / 2;
   const cy = box.y + box.h / 2;
-  const size = Math.max(box.w, box.h) * scale;
 
-  // Define the crop area (might go out of bounds)
-  const x = cx - size / 2;
-  const y = cy - size / 2;
+  const cropSize = Math.max(box.w, box.h) * scale;
+  console.log(`Cropping with scale ${scale.toFixed(2)}, crop size: ${cropSize.toFixed(0)}`);
 
-  // Always create a square canvas
-  const c = document.createElement("canvas");
-  c.width = 120;  // Fixed size for transmission (saves bandwidth)
-  c.height = 120;
-  const ctx = c.getContext("2d");
+  let x = cx - cropSize / 2;
+  let y = cy - cropSize / 2;
 
-  // This drawImage version handles out-of-bounds by not stretching
-  // It maps the video region (x, y, size, size) to the canvas (0, 0, 120, 120)
-  ctx.drawImage(video, x, y, size, size, 0, 0, 120, 120);
+  // Clamp to bounds
+  x = Math.max(0, Math.min(x, vw - cropSize));
+  y = Math.max(0, Math.min(y, vh - cropSize));
 
-  // Use 0.8 quality to keep the file small but keep texture details
-//   return c.toDataURL("image/jpeg", 0.8);
-  return new Promise(resolve => {
-    c.toBlob(blob => resolve(blob), "image/jpeg", 0.9);
-  });
+  const canvas = document.createElement("canvas");
+  canvas.width = targetSize;
+  canvas.height = targetSize;
+
+  const ctx = canvas.getContext("2d", { alpha: false });
+
+  // 🔥 Critical: prevent blur
+  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingQuality = "high";
+
+  ctx.drawImage(
+    video,
+    x, y, cropSize, cropSize,
+    0, 0, targetSize, targetSize
+  );
+
+  return new Promise(res => canvas.toBlob(res, "image/png"));
+}
+
+
+async function generateDualCrops(video, box) {
+  if (!box) return null;
+
+  if (box.w < 100 || box.h < 100) {
+    statusEl.textContent = "Move closer for verification";
+    return null;
+  }
+
+  const scaleV2 = adaptiveScale(box.w, MAX_SCALE_V2);
+  const scaleV1SE = adaptiveScale(box.w, MAX_SCALE_V1SE);
+
+  const [blobV2, blobV1SE] = await Promise.all([
+    cropFace(video, box, MINI_INPUT_SIZE, scaleV2),
+    cropFace(video, box, MINI_INPUT_SIZE, scaleV1SE)
+  ]);
+
+  return { blobV2, blobV1SE };
+}
+
+async function generateFaceBagnetCrop(video, box) {
+  if (!box) return null;
+
+  const scale = adaptiveScale(box.w, MAX_SCALE_FACEBAG);
+
+  return cropFace(
+    video,
+    box,
+    FACEBAG_INPUT_SIZE,
+    scale
+  );
 }
 
 
 async function sendFaceCrop(box) {
   if (!wsLiveness || wsLiveness.readyState !== WebSocket.OPEN) return;
 
-  const blob = await cropFaceScaled(video, box, CROP_SCALE);
-  if (!blob) return;
+  const mini = await generateDualCrops(video, box);
+  const facebag = await generateFaceBagnetCrop(video, box);
+
+  if (!mini || !facebag) return;
 
   wsLiveness.send(JSON.stringify({
-    type: "face_crop",
-    encoding: "binary",
-    mime: "image/jpeg",
-    size: blob.size
+    type: "liveness_payload",
+    mini: true,
+    facebag: true
   }));
 
-  const buffer = await blob.arrayBuffer();
-  wsLiveness.send(buffer);
+  wsLiveness.send(await mini.blobV2.arrayBuffer());
+  wsLiveness.send(await mini.blobV1SE.arrayBuffer());
+  wsLiveness.send(await facebag.arrayBuffer());
 }
 
 
