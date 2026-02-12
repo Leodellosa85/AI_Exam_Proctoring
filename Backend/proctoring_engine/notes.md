@@ -183,3 +183,79 @@ MiniFASNet is trained mainly for replay / texture / motion
 
 It is weak on static printed photos on webcams
 
+- Attack Presentation Classification Error Rate (APCER)
+    % of photo attacks classified as real
+    APCER = (Photo frames classified as REAL) / (Total photo frames)
+    This is the key metric for your weakness case.
+- False Acceptance Rate (FAR – photo)
+    FAR_photo = Accepted photo sessions / Total photo sessions
+    Session-based FAR is much more honest than frame-based.
+- Score distribution    
+    Plot:
+    live score histogram
+    photo score histogram
+    If they overlap heavily → model is weak for that case.
+
+1️⃣ FRR — False Rejection Rate
+Plain meaning
+- How often a real (live) user is wrongly rejected as fake
+Formal definition
+- FRR = (Number of live samples rejected) / (Total live samples)
+FRR answers:
+“How often does my system wrongly flag a real examinee as cheating?”
+Example
+100 real examinee sessions
+7 were flagged as fake or terminated
+FRR = 7 / 100 = 7%
+
+High FRR = bad user experience
+Low FRR = fair exam experience
+
+2️⃣ BPCER — Bona Fide Presentation Classification Error Rate
+Plain meaning
+ISO standard name for FRR in face anti-spoofing
+BPCER and FRR mean the same thing, but:
+Term	    Used in
+FRR	        Biometrics / authentication
+BPCER	    Face anti-spoofing (ISO/IEC 30107-3)
+
+Formal ISO definition
+BPCER = (Live samples classified as attack) / (Total live samples)
+✔ “Bona fide” = genuine live user
+✔ “Presentation” = what the camera sees
+
+3️⃣ APCER (for completeness)
+Since BPCER is almost always paired with APCER:
+APCER — Attack Presentation Classification Error Rate
+How often an attack is wrongly accepted as live
+APCER = (Attack samples classified as live) / (Total attack samples)
+This is the security risk metric.
+
+4️⃣ Mapping to your MiniFASNet proctoring system
+Scenario	                        Metric
+Real student flagged fake	        FRR / BPCER
+Photo or replay passes	            APCER
+Photo exam passes fully	Session     FAR
+
+5️⃣ Frame-based vs session-based (important)
+Frame-based BPCER
+% of frames misclassified
+Good for model analysis, but optimistic.
+Session-based BPCER (recommended for you)
+% of exam sessions where a real user fails
+
+Better for online exams.
+Example:
+One false flag → exam terminated → entire session counts as error
+
+6️⃣ How to word this in a report (you can copy)
+“System performance is evaluated using ISO/IEC 30107-3 metrics. Bona fide presentation classification error rate (BPCER) represents the proportion of genuine examinee sessions incorrectly rejected, while attack presentation classification error rate (APCER) measures the proportion of spoof attempts incorrectly accepted.”
+
+7️⃣ Why this matters for your defense
+Low BPCER → fairness to students
+Low APCER → security against cheating
+MiniFASNet is typically optimized to lower APCER (security)
+
+Static photo attacks increase APCER, not BPCER
+That framing protects your design choices.
+

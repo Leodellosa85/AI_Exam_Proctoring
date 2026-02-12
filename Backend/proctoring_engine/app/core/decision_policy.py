@@ -3,19 +3,16 @@ from typing import Dict, Any
 
 
 class DecisionPolicy:
-    """
-    Spoof decision policy with:
-    - Model-aware fusion
-    - Hard spoof gates
-    - Temporal smoothing
-    """
-
     def __init__(
         self,
         window: int = 5,
-        facebagnet_gate: float = 0.20,
-        suspicious_threshold: float = 0.12,
-        fake_threshold: float = 0.18,
+        # If Realness is below 85%, it's definitely a phone screen
+        facebagnet_gate: float = 0.85,      
+        # Thresholds for combined 'SPOOFINESS' (1.0 - Realness)
+        # Real face (0.04 spoofiness) will pass 0.07.
+        # Phone attack (0.14 spoofiness) will fail 0.07.
+        suspicious_threshold: float = 0.07, 
+        fake_threshold: float = 0.12,
     ):
         self.window = window
         self.facebagnet_gate = facebagnet_gate
@@ -23,49 +20,27 @@ class DecisionPolicy:
         self.fake_threshold = fake_threshold
 
     def update(self, scores: Dict[str, float], session: Dict) -> Dict[str, Any]:
-        """
-        Update decision using current frame scores.
+        history = session.setdefault("spoof_history", deque(maxlen=self.window))
 
-        Args:
-            scores: {"minifasnet": float, "facebagnet": float}
-            session: session dict (persistent across frames)
+        fb_score = scores.get("facebagnet")
+        mini_score = scores.get("minifasnet", 0)
 
-        Returns:
-            dict with liveness decision and metadata
-        """
+        # 1. HARD GATE
+        if fb_score is not None and fb_score < self.facebagnet_gate:
+            history.append(1.0)
+            return self._result("fake", 1.0, scores, history, reason="facebagnet_gate")
 
-        history = session.setdefault(
-            "spoof_history",
-            deque(maxlen=self.window)
-        )
-
-        # ------------------------------
-        # Sanity check
-        # ------------------------------
-        if not scores:
-            return self._result("unstable", None, scores, history)
-
-        # ------------------------------
-        # Hard photo-attack gate
-        # FaceBagNet is trusted for photos
-        # ------------------------------
-        facebag_score = scores.get("facebagnet")
-        if facebag_score is not None and facebag_score >= self.facebagnet_gate:
-            history.append(facebag_score)
-            return self._result("fake", facebag_score, scores, history, reason="facebagnet_gate")
-
-        # ------------------------------
-        # Fusion logic (MAX, not AVG)
-        # Prevent weak models from suppressing strong ones
-        # ------------------------------
-        combined = max(scores.values())
-        history.append(combined)
+        # 2. CONVERT TO SPOOFINESS
+        # FaceBagNet: Low score is bad. (1 - score) = Spoofiness
+        # MiniFASNet: High score is bad. (already Spoofiness)
+        fb_spoofiness = (1.0 - fb_score) if fb_score is not None else 0
+        
+        current_frame_spoof = max(mini_score, fb_spoofiness)
+        history.append(current_frame_spoof)
 
         avg = sum(history) / len(history)
 
-        # ------------------------------
-        # Temporal decision
-        # ------------------------------
+        # 3. DECISION BASED ON AVERAGE
         if avg >= self.fake_threshold:
             liveness = "fake"
         elif avg >= self.suspicious_threshold:
@@ -74,10 +49,7 @@ class DecisionPolicy:
             liveness = "real"
 
         return self._result(liveness, avg, scores, history)
-
-    # --------------------------------------------------
-    # Helpers
-    # --------------------------------------------------
+    
     def _result(self, liveness, score, scores, history, reason=None):
         return {
             "liveness": liveness,
@@ -87,3 +59,4 @@ class DecisionPolicy:
             "frames": len(history),
             "reason": reason,
         }
+

@@ -45,8 +45,18 @@ class FaceBagNetDetector:
 
         inp = self.preprocess(face_bgr)
         output = self.session.run(None, {self.input_name: inp})[0][0]
-        score_diff = output[0] - output[1]
+        score_diff = output[1] - output[0]
         
-        normalized_spoof_score = 1.0 / (1.0 + np.exp(-score_diff / 250.0))
-        print("Normalized Spoof Score:", normalized_spoof_score)
-        return float(normalized_spoof_score)
+        # FIX: Subtract Fake (raw0) from Real (raw1)
+        # Based on your logs: 390.77 - (-393.70) = +784.47 (A very strong REAL signal)
+        score_diff = output[1] - output[0] 
+        
+        # With diffs as large as 700+, we need a larger divisor 
+        # to keep the sigmoid from flatlining at 1.0 immediately.
+        # 200.0 will put +784 at ~0.98 Normalized Score (Real)
+        normalized_score = 1.0 / (1.0 + np.exp(-score_diff / 200.0))
+        
+        print(f"DEBUG: raw0={output[0]:.2f}, raw1={output[1]:.2f}, diff={score_diff:.2f}")
+        print(f"Normalized FaceBag Score (Realness): {normalized_score:.4f}")
+        
+        return float(normalized_score)
